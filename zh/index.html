@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS渐变工具 - CSS远不止如此|破瓶子PHP提供</title>
+
+<script>
+(function(){
+  try {
+    const saveTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+    if(saveTheme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }catch(e){
+    // 无痕/隐私模式localStorage不可用时兜底浅色
+    document.documentElement.classList.remove('dark');
+  }
+})();
+</script>
+<link rel="stylesheet" href="css/remixicon.css"/>
+<link href="css/style.css" rel="stylesheet" />
+<script src="js/color.js"></script>
+<script src="js/light.js"></script>
+</head>
+<body>
+<div class="message">
+    <div class="message_content">
+        <div class="message_text"></div>
+        <div class="message_close"><i class="ri-close-line"></i></div>
+    </div>
+</div>
+<script src="js/message.js"></script>
+<div class="container">
+<div class="h1">
+    <h1>破瓶子PHP - CSS渐变生成工具</h1>
+    <button class="darkbut"><i class="ri-moon-line"></i><span class="msgtitle">切换主题</span></button>
+</div>
+<div class="main-wrap">
+<!-- 预览区-->
+<div class="preview-box">
+<div class="preview-wrap">
+<div id="preview"></div>
+</div>
+<div class="code-area" id="cssCode">background: linear-gradient(45deg, rgba(79,172,254,1) 0%, rgba(0,242,254,1) 100%);</div>
+
+<!-- 全局平铺配置（整个背景共用，非单图层） -->
+<div class="group-title">背景平铺配置</div>
+<div class="row">
+    <label>平铺大小</label>
+    <input type="text" id="globalBgSize" placeholder="20px 20px,100% 100%">
+</div>
+<div class="row">
+    <label>平铺位置</label>
+    <input type="text" id="globalBgPos" placeholder="0 0,10px 10px">
+</div>
+
+<button class="btn btn-copy" id="copyBtn"><i class="ri-file-copy-line"></i> 复制CSS代码</button>
+
+<!-- 预设区域 -->
+<div class="preset-wrap">
+    <div class="group-title">渐变预设</div>
+    <div class="preset-grid" id="presetBox"></div>
+</div>
+</div>
+
+<!-- 右侧仅控制面板 -->
+ 
+<div class="control-panel">
+<div class="group-title">渐变图层</div>
+<div class="layer-list" id="layerList"></div>
+<button class="btn btn-add-layer" id="addLayerBtn"><i class="ri-stack-line"></i> 新增图层</button>
+
+<div class="group-title">当前图层配置</div>
+<div class="row">
+<label>渐变类型</label>
+<select id="gradType">
+    <option value="linear">线性渐变</option>
+    <option value="repeating-linear">重复线性</option>
+    <option value="radial">径向渐变</option>
+    <option value="repeating-radial">重复径向</option>
+</select>
+</div>
+
+<div id="linearConfig">
+<div class="row">
+<label>渐变角度</label>
+<input type="range" id="angleRange" min="0" max="360" value="45">
+<input type="number" id="angleNum" min="0" max="360" value="45">
+</div>
+</div>
+
+<div id="radialConfig" style="display:none">
+<div class="row">
+<label>径向形状</label>
+<select id="radShape">
+<option value="circle">正圆形</option>
+<option value="ellipse">椭圆形</option>
+</select>
+</div>
+<div class="row">
+<label>尺寸</label>
+<select id="radSize">
+<option value="closest-side">closest-side</option>
+<option value="farthest-side">farthest-side</option>
+<option value="closest-corner">closest-corner</option>
+<option value="farthest-corner" selected>farthest-corner</option>
+</select>
+</div>
+<div class="row">
+<label>中心X%</label>
+<input type="range" id="radXRange" min="0" max="100" value="50">
+<input type="number" id="radXNum" min="0" max="100" value="50">
+</div>
+<div class="row">
+<label>中心Y%</label>
+<input type="range" id="radYRange" min="0" max="100" value="50">
+<input type="number" id="radYNum" min="0" max="100" value="50">
+</div>
+</div>
+
+<div class="group-title">色标（拖拽滑块调位置）</div>
+<div class="stop-drag-track" id="stopTrack"></div>
+<div class="color-stop-list" id="stopList"></div>
+<button class="btn btn-add-stop" id="addStopBtn"><i class="ri-add-large-line"></i> 添加色标</button>
+</div>
+</div>
+</div>
+<!-- 右键菜单 -->
+<div class="context-menu" id="layerCtx">
+    <div data-action="copy">复制图层</div>
+    <div data-action="paste">粘贴图层</div>
+    <div class="sep"></div>
+    <div data-action="del">删除图层</div>
+</div>
+<div class="context-menu" id="stopCtx">
+    <div data-action="copy">复制色标</div>
+    <div data-action="paste">粘贴色标</div>
+    <div class="sep"></div>
+    <div data-action="del">删除色标</div>
+</div>
+<script src="js/cssCode.js"></script>
+</body>
+</html>
