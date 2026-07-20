@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSS Gradient Tool | More Than CSS | BrokenBottle PHP</title>
+
+<script>
+(function(){
+  try {
+    const saveTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+    if(saveTheme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }catch(e){
+    document.documentElement.classList.remove('dark');
+  }
+})();
+</script>
+<link rel="stylesheet" href="css/remixicon.css"/>
+<link href="css/style.css" rel="stylesheet" />
+<script src="js/color.js"></script>
+<script src="js/light.js"></script>
+</head>
+<body>
+<div class="message">
+    <div class="message_content">
+        <div class="message_text"></div>
+        <div class="message_close"><i class="ri-close-line"></i></div>
+    </div>
+</div>
+<script src="js/message.js"></script>
+<div class="container">
+<div class="h1">
+    <h1>BrokenBottle PHP - CSS Gradient Generator</h1>
+    <button class="darkbut"><i class="ri-moon-line"></i><span class="msgtitle">Toggle Theme</span></button>
+</div>
+<div class="main-wrap">
+<div class="preview-box">
+<div class="preview-wrap">
+<div id="preview"></div>
+</div>
+<div class="code-area" id="cssCode">background: linear-gradient(45deg, rgba(79,172,254,1) 0%, rgba(0,242,254,1) 100%);</div>
+
+<div class="group-title">Background Tile Settings</div>
+<div class="row">
+    <label>Background Size</label>
+    <input type="text" id="globalBgSize" placeholder="20px 20px,100% 100%">
+</div>
+<div class="row">
+    <label>Background Position</label>
+    <input type="text" id="globalBgPos" placeholder="0 0,10px 10px">
+</div>
+
+<button class="btn btn-copy" id="copyBtn"><i class="ri-file-copy-line"></i> Copy CSS Code</button>
+
+<div class="preset-wrap">
+    <div class="group-title">Gradient Presets</div>
+    <div class="preset-grid" id="presetBox"></div>
+</div>
+</div>
+
+<div class="control-panel">
+<div class="group-title">Gradient Layers</div>
+<div class="layer-list" id="layerList"></div>
+<button class="btn btn-add-layer" id="addLayerBtn"><i class="ri-stack-line"></i> Add Layer</button>
+
+<div class="group-title">Current Layer Settings</div>
+<div class="row">
+<label>Gradient Type</label>
+<select id="gradType">
+    <option value="linear">Linear Gradient</option>
+    <option value="repeating-linear">Repeating Linear</option>
+    <option value="radial">Radial Gradient</option>
+    <option value="repeating-radial">Repeating Radial</option>
+</select>
+</div>
+
+<div id="linearConfig">
+<div class="row">
+<label>Gradient Angle</label>
+<input type="range" id="angleRange" min="0" max="360" value="45">
+<input type="number" id="angleNum" min="0" max="360" value="45">
+</div>
+</div>
+
+<div id="radialConfig" style="display:none">
+<div class="row">
+<label>Radial Shape</label>
+<select id="radShape">
+<option value="circle">Circle</option>
+<option value="ellipse">Ellipse</option>
+</select>
+</div>
+<div class="row">
+<label>Size Keyword</label>
+<select id="radSize">
+<option value="closest-side">closest-side</option>
+<option value="farthest-side">farthest-side</option>
+<option value="closest-corner">closest-corner</option>
+<option value="farthest-corner" selected>farthest-corner</option>
+</select>
+</div>
+<div class="row">
+<label>Center X %</label>
+<input type="range" id="radXRange" min="0" max="100" value="50">
+<input type="number" id="radXNum" min="0" max="100" value="50">
+</div>
+<div class="row">
+<label>Center Y %</label>
+<input type="range" id="radYRange" min="0" max="100" value="50">
+<input type="number" id="radYNum" min="0" max="100" value="50">
+</div>
+</div>
+
+<div class="group-title">Color Stops (Drag Sliders To Adjust Position)</div>
+<div class="stop-drag-track" id="stopTrack"></div>
+<div class="color-stop-list" id="stopList"></div>
+<button class="btn btn-add-stop" id="addStopBtn"><i class="ri-add-large-line"></i> Add Color Stop</button>
+</div>
+</div>
+</div>
+<div class="context-menu" id="layerCtx">
+    <div data-action="copy">Duplicate Layer</div>
+    <div data-action="paste">Paste Layer</div>
+    <div class="sep"></div>
+    <div data-action="del">Delete Layer</div>
+</div>
+<div class="context-menu" id="stopCtx">
+    <div data-action="copy">Duplicate Stop</div>
+    <div data-action="paste">Paste Stop</div>
+    <div class="sep"></div>
+    <div data-action="del">Delete Stop</div>
+</div>
+<script src="js/cssCode.js"></script>
+</body>
+</html>
