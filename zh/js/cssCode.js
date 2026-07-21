@@ -15,7 +15,6 @@ let layers = [
         ]
     }
 ];
-
 // 全局背景尺寸、位置
 let bgSizeValue = '';
 let bgPosValue = '';
@@ -24,6 +23,26 @@ let copyLayerData = null;
 let copyStopData = null;
 let dragLayerIdx = null;
 let dragStopIdx = null;
+
+// ===== 移动端触屏交互变量 =====
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let touchDragLayerIdx = null;
+let isLayerTouchDragging = false;
+let longPressTimer = null;
+const LONG_PRESS_MS = 300;    // 长按触发拖拽的时间阈值
+const TAP_MOVE_THRESHOLD = 20; // 点击允许的最大移动像素
+const DOUBLE_TAP_MS = 350;     // 双击时间阈值
+let ignoreNextClick = false;
+
+// 各模块双击状态独立，避免互相干扰
+let lastLayerTapTime = 0;
+let lastLayerTapIndex = -1;
+let lastStopItemTapTime = 0;
+let lastStopItemTapIndex = -1;
+let lastStopTapTime = 0;
+let lastStopTapIndex = -1;
 
 // DOM
 const preview = document.getElementById('preview');
@@ -95,12 +114,40 @@ function splitByCommaIgnoreBrackets(str) {
     if (lastSegment) result.push(lastSegment);
     return result;
 }
+
 // 关闭所有右键菜单
 function hideAllCtx(){
     layerCtx.style.display = 'none';
     stopCtx.style.display = 'none';
 }
-document.addEventListener('click',hideAllCtx);
+
+// 调整右键菜单位置，避免超出屏幕边界
+function adjustCtxPosition(ctxEl, x, y) {
+    ctxEl.style.visibility = 'hidden';
+    ctxEl.style.display = 'block';
+    const rect = ctxEl.getBoundingClientRect();
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    let finalX = x;
+    let finalY = y;
+    if (x + rect.width > viewW) finalX = viewW - rect.width - 5;
+    if (y + rect.height > viewH) finalY = viewH - rect.height - 5;
+    ctxEl.style.left = finalX + 'px';
+    ctxEl.style.top = finalY + 'px';
+    ctxEl.style.visibility = 'visible';
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#layerCtx') || e.target.closest('#stopCtx')) {
+        return;
+    }
+    if (ignoreNextClick) {
+        ignoreNextClick = false;
+        return;
+    }
+    hideAllCtx();
+});
+
 // Hex转rgba
 function hexToRgba(hex, aPct){
     const r = parseInt(hex.slice(1,3),16);
@@ -112,10 +159,12 @@ function hexToRgba(hex, aPct){
     else a = Number(a.toFixed(1));
     return `rgba(${r},${g},${b},${a})`;
 }
+
 // 深拷贝对象
 function deepClone(obj){
     return JSON.parse(JSON.stringify(obj));
 }
+
 // 渲染预设面板
 function renderPresets(){
     presetBox.innerHTML = '';
@@ -124,8 +173,6 @@ function renderPresets(){
         wrap.className = 'preset-item';
         const inner = document.createElement('div');
         inner.className = 'preset-inner';
-
-        // 拆分预设完整样式，分离渐变、size、position
         let gradStr = '';
         let sSize = '';
         let sPos = '';
@@ -135,16 +182,15 @@ function renderPresets(){
             if(rule.startsWith('background-size:')) sSize = rule.replace(/^background-size:\s*/,'').trim();
             if(rule.startsWith('background-position:')) sPos = rule.replace(/^background-position:\s*/,'').trim();
         }
-
         inner.style.background = gradStr;
         if(sSize) inner.style.backgroundSize = sSize;
         if(sPos) inner.style.backgroundPosition = sPos;
-
         wrap.appendChild(inner);
         wrap.onclick = ()=>loadPreset(p.grad);
         presetBox.appendChild(wrap);
     })
 }
+
 // 加载预设
 function loadPreset(fullBgStr){
     let pureGradText = '';
@@ -164,7 +210,6 @@ function loadPreset(fullBgStr){
     bgPosValue = posVal;
     globalBgSizeInput.value = sizeVal;
     globalBgPosInput.value = posVal;
-
     const layerArr = splitMultiGrad(pureGradText);
     if(!Array.isArray(layerArr) || layerArr.length === 0){
         layers = [{
@@ -188,6 +233,7 @@ function loadPreset(fullBgStr){
     renderStopList();
     updatePreview();
 }
+
 // 栈分割多层渐变
 function splitMultiGrad(str){
     const result = [];
@@ -228,7 +274,6 @@ function splitMultiGrad(str){
     return result.map(g=>parseSingleGrad(g));
 }
 
-
 function parseSingleGrad(gStr) {
     if (!gStr || typeof gStr !== 'string' || 
         (!gStr.includes('linear-gradient') && !gStr.includes('radial-gradient') && !gStr.includes('conic-gradient'))) {
@@ -266,7 +311,6 @@ function parseSingleGrad(gStr) {
     }
     const rawParts = splitByCommaIgnoreBrackets(bracketMatch[1]);
     let colorStartIdx = 0;
-
     // 线性渐变解析
     if (layer.type === 'linear' || layer.type === 'repeating-linear') {
         const degMatch = rawParts[0].match(/^\s*(\d+)\s*deg\s*$/);
@@ -342,7 +386,6 @@ function parseSingleGrad(gStr) {
         }
         colorStartIdx = hasConfig ? 1 : 0;
     }
-
     // 色标解析
     const colorItems = rawParts.slice(colorStartIdx);
     for (const seg of colorItems) {
@@ -424,7 +467,7 @@ function renderLayerList(){
             dragLayerIdx = idx;
             layerCtx.style.left = e.clientX + 'px';
             layerCtx.style.top = e.clientY + 'px';
-            layerCtx.style.display = 'block';
+            adjustCtxPosition(layerCtx, e.clientX, e.clientY);
         }
         item.ondragstart = function(){ dragLayerIdx = idx; }
         item.ondragover = function(e){
@@ -450,6 +493,135 @@ function renderLayerList(){
             renderStopList();
             updatePreview();
         }
+
+        // ===== 移动端图层触屏交互：单击选中、双击弹菜单、长按拖拽 =====
+        item.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.del-layer')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+            touchDragLayerIdx = idx;
+            // 长按定时器：超时后进入拖拽模式
+            longPressTimer = setTimeout(() => {
+                isLayerTouchDragging = true;
+                item.classList.add('dragging-source');// 拖拽源元素脱离效果
+                if (navigator.vibrate) navigator.vibrate(50); // 震动反馈
+            }, LONG_PRESS_MS);
+        }, { passive: true });
+
+        item.addEventListener('touchmove', function(e) {
+            if (touchDragLayerIdx === null) return;
+            const touch = e.touches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            // 移动超过阈值则取消长按判定
+            if (!isLayerTouchDragging && (moveX > TAP_MOVE_THRESHOLD || moveY > TAP_MOVE_THRESHOLD)) {
+                clearTimeout(longPressTimer);
+            }
+            // 拖拽模式：实时高亮目标图层
+            if (isLayerTouchDragging) {
+                e.preventDefault();
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetItem = elemBelow?.closest('.layer-item');
+                document.querySelectorAll('.layer-item').forEach(el => el.classList.remove('drag-over'));
+                if (targetItem && targetItem.dataset.idx != idx) {
+                    targetItem.classList.add('drag-over');
+                }
+            }
+        }, { passive: false });
+
+        item.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+            const touch = e.changedTouches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            const duration = Date.now() - touchStartTime;
+
+            // 长按拖拽结束 → 执行排序
+            if (isLayerTouchDragging) {
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetItem = elemBelow?.closest('.layer-item');
+                if (targetItem) {
+                    const targetIdx = Number(targetItem.dataset.idx);
+                    if (touchDragLayerIdx !== null && touchDragLayerIdx !== targetIdx) {
+                        const temp = layers[touchDragLayerIdx];
+                        layers.splice(touchDragLayerIdx, 1);
+                        layers.splice(targetIdx, 0, temp);
+                        // 同步激活图层索引
+                        if (activeLayerIndex === touchDragLayerIdx) {
+                            activeLayerIndex = targetIdx;
+                        } else if (touchDragLayerIdx < activeLayerIndex && targetIdx >= activeLayerIndex) {
+                            activeLayerIndex--;
+                        } else if (touchDragLayerIdx > activeLayerIndex && targetIdx <= activeLayerIndex) {
+                            activeLayerIndex++;
+                        }
+                    }
+                }
+                // 重置状态
+                isLayerTouchDragging = false;
+                touchDragLayerIdx = null;
+                document.querySelectorAll('.layer-item').forEach(el => {
+                    el.classList.remove('drag-over');
+                    el.classList.remove('dragging-source');
+                });
+                renderLayerList();
+                syncLayerToControl();
+                renderStopDragTrack();
+                renderStopList();
+                updatePreview();
+                return;
+            }
+
+            // 短按点击判定
+            if (duration < LONG_PRESS_MS && moveX < TAP_MOVE_THRESHOLD && moveY < TAP_MOVE_THRESHOLD) {
+                if (e.target.closest('.del-layer')) return;
+                const now = Date.now();
+                const timeDiff = now - lastLayerTapTime;
+
+                // 双击同一个图层 → 弹出操作菜单
+                if (timeDiff < DOUBLE_TAP_MS && lastLayerTapIndex === idx) {
+                    activeLayerIndex = idx;
+                    dragLayerIdx = idx;
+                    renderLayerList();
+                    syncLayerToControl();
+                    renderStopDragTrack();
+                    renderStopList();
+                    updatePreview();
+                    hideAllCtx();
+                    ignoreNextClick = true;
+                    layerCtx.style.left = touch.clientX + 'px';
+                    layerCtx.style.top = touch.clientY + 'px';
+                    adjustCtxPosition(layerCtx, touch.clientX, touch.clientY);
+                    lastLayerTapTime = 0;
+                    lastLayerTapIndex = -1;
+                } else {
+                    // 单击 → 仅选中图层
+                    activeLayerIndex = idx;
+                    renderLayerList();
+                    syncLayerToControl();
+                    renderStopDragTrack();
+                    renderStopList();
+                    updatePreview();
+                    // 记录单击状态，等待第二次点击
+                    lastLayerTapTime = now;
+                    lastLayerTapIndex = idx;
+                }
+            }
+
+            touchDragLayerIdx = null;
+        });
+
+        item.addEventListener('touchcancel', function() {
+            clearTimeout(longPressTimer);
+            isLayerTouchDragging = false;
+            touchDragLayerIdx = null;
+            document.querySelectorAll('.layer-item').forEach(el => {
+                el.classList.remove('drag-over');
+                el.classList.remove('dragging-source');
+            });
+        });
+
         layerList.appendChild(item);
     })
     document.querySelectorAll('.del-layer').forEach(btn=>{
@@ -520,7 +692,6 @@ function toggleGradPanel(){
     radialConfig.style.display = (t === 'radial' || t === 'repeating-radial') ? 'block' : 'none';
     conicConfig.style.display = (t === 'conic' || t === 'repeating-conic') ? 'block' : 'none';
 }
-
 // 统一获取鼠标/触摸横坐标
 function getEventClientX(e) {
   if (e.touches && e.touches.length > 0) {
@@ -528,7 +699,6 @@ function getEventClientX(e) {
   }
   return e.clientX;
 }
-
 // 色标拖拽轨道
 function renderStopDragTrack() {
   stopTrack.innerHTML = '';
@@ -542,7 +712,6 @@ function renderStopDragTrack() {
     let unbindMove = null;
     let unbindEnd = null;
     let unbindCancel = null;
-
     // 拖拽移动统一处理
     function handleMove(e) {
       if (!dragging) return;
@@ -555,7 +724,6 @@ function renderStopDragTrack() {
       renderStopList();
       updatePreview();
     }
-
     // 拖拽结束统一清理
     function handleEnd() {
       dragging = false;
@@ -566,7 +734,6 @@ function renderStopDragTrack() {
       unbindEnd = null;
       unbindCancel = null;
     }
-
     // 拖拽开始
     function handleStart(e) {
       e.preventDefault();
@@ -582,7 +749,6 @@ function renderStopDragTrack() {
       document.addEventListener('touchmove', moveFn, { passive: false });
       document.addEventListener('touchend', endFn);
       document.addEventListener('touchcancel', endFn);
-
       unbindMove = () => {
         document.removeEventListener('mousemove', moveFn);
         document.removeEventListener('touchmove', moveFn);
@@ -595,21 +761,33 @@ function renderStopDragTrack() {
         document.removeEventListener('touchcancel', endFn);
       };
     }
-
     // PC鼠标按下
     thumb.addEventListener('mousedown', handleStart, { passive: false });
-    // 移动端触摸按下
-    thumb.addEventListener('touchstart', handleStart, { passive: false });
-    // 右键菜单（均分色标）
+    // 移动端触摸：双击均分 + 单击拖拽
+    thumb.addEventListener('touchstart', function(e) {
+        const now = Date.now();
+        const timeDiff = now - lastStopTapTime;
+        // 双击同一个滑块 → 触发均分
+        if (timeDiff < DOUBLE_TAP_MS && lastStopTapIndex === idx) {
+            e.preventDefault();
+            distributeStopsEvenly();
+            lastStopTapTime = 0;
+            lastStopTapIndex = -1;
+            return;
+        }
+        // 单击 → 记录状态，正常进入拖拽
+        lastStopTapTime = now;
+        lastStopTapIndex = idx;
+        handleStart.call(this, e);
+    }, { passive: false });
+    // PC右键均分
     thumb.oncontextmenu = function (e) {
       e.preventDefault();
       distributeStopsEvenly();
     };
-
     stopTrack.appendChild(thumb);
   });
 }
-
 // 渲染色标列表
 function renderStopList(){
     const ly = layers[activeLayerIndex];
@@ -645,8 +823,50 @@ function renderStopList(){
             renderStopList();
             stopCtx.style.left = e.clientX + 'px';
             stopCtx.style.top = e.clientY + 'px';
-            stopCtx.style.display = 'block';
+            adjustCtxPosition(stopCtx, e.clientX, e.clientY);
         }
+
+        // ===== 移动端色标项触屏交互：单击选中、双击弹菜单 =====
+        item.addEventListener('touchstart', function(e) {
+            if (e.target.closest('input') || e.target.closest('button')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        }, { passive: true });
+
+        item.addEventListener('touchend', function(e) {
+            if (e.target.closest('input') || e.target.closest('button')) return;
+            const touch = e.changedTouches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            const duration = Date.now() - touchStartTime;
+
+            if (duration < LONG_PRESS_MS && moveX < TAP_MOVE_THRESHOLD && moveY < TAP_MOVE_THRESHOLD) {
+                const now = Date.now();
+                const timeDiff = now - lastStopItemTapTime;
+                // 双击同一个色标项 → 弹出操作菜单
+                if (timeDiff < DOUBLE_TAP_MS && lastStopItemTapIndex === idx) {
+                    dragStopIdx = idx;
+                    renderStopDragTrack();
+                    renderStopList();
+                    hideAllCtx();
+                    ignoreNextClick = true;
+                    stopCtx.style.left = touch.clientX + 'px';
+                    stopCtx.style.top = touch.clientY + 'px';
+                    adjustCtxPosition(stopCtx, touch.clientX, touch.clientY);
+                    lastStopItemTapTime = 0;
+                    lastStopItemTapIndex = -1;
+                } else {
+                    dragStopIdx = idx;
+                    renderStopDragTrack();
+                    renderStopList();
+                    lastStopItemTapTime = now;
+                    lastStopItemTapIndex = idx;
+                }
+            }
+        });
+
         stopList.appendChild(item);
     })
     document.querySelectorAll('input[type="color"]').forEach(inp=>{
@@ -700,15 +920,14 @@ function renderStopList(){
         }
     })
 }
+
 // 均分当前图层的所有色标位置
 function distributeStopsEvenly() {
     const stops = layers[activeLayerIndex].stops;
     const total = stops.length;
     if (total < 2) return;
-
     const startPos = stops[0].pos;
     const endPos = stops[total - 1].pos;
-
     for (let i = 0; i < total; i++) {
         const ratio = i / (total - 1);
         stops[i].pos = Math.round(startPos + (endPos - startPos) * ratio);
@@ -745,6 +964,7 @@ stopCtx.querySelectorAll('div[data-action]').forEach(el=>{
         hideAllCtx();
     }
 })
+
 // 生成单层渐变CSS
 function buildSingleGradient(layer){
     const stopText = layer.stops.map(s=>`${hexToRgba(s.hex,s.alpha)} ${s.pos}%`).join(', ');
@@ -769,7 +989,6 @@ function generateFullBackground(){
     const allGrads = reversedLayers.map(l=>buildSingleGradient(l)).join(', ');
     const mode = globalBgRepeat.value;
     let css = `background: ${allGrads};`;
-
     // 全局尺寸、位置
     const sizeTxt = bgSizeValue.trim();
     const posTxt = bgPosValue.trim();
@@ -792,7 +1011,6 @@ function updatePreview(){
     const fullCode = generateFullBackground();
     const gradOnly = fullCode.replace('background: ','').replace(/;[\s\S]*$/,'');
     const mode = globalBgRepeat.value;
-
     if (mode === 'box') {
         // 盒子渐变模式
         previewspan.style.display = 'none';
@@ -812,7 +1030,6 @@ function updatePreview(){
         previewspan.style.backgroundClip = 'text';
         previewspan.style.webkitTextFillColor = 'transparent';
     }
-
     cssCode.innerText = fullCode;
 }
 
@@ -844,6 +1061,7 @@ addStopBtn.onclick = function(){
     renderStopList();
     updatePreview();
 }
+
 // 复制代码
 async function copyText(text) {
     // 现代Clipboard API优先
@@ -982,7 +1200,6 @@ conicYNum.oninput = function(){
     layers[activeLayerIndex].conicY = val;
     updatePreview();
 }
-
 // 初始化
 renderPresets();
 renderLayerList();
@@ -991,7 +1208,6 @@ renderStopDragTrack();
 renderStopList();
 toggleGradPanel();
 updatePreview();
-
 //移动端可拖动预览区位置
 let isDrag = false;
 let offsetX = 0;
@@ -1005,7 +1221,6 @@ function handleTouchStart(e) {
   const touch = e.touches[0];
   offsetX = touch.clientX - previewWrapdom.offsetLeft;
   offsetY = touch.clientY - previewWrapdom.offsetTop;
-  // 仅自身拖拽时阻止滚动，不影响其他元素触摸
   e.preventDefault();
 }
 // 抽离touchmove处理函数
@@ -1016,7 +1231,6 @@ function handleTouchMove(e) {
   const y = touch.clientY - offsetY;
   previewWrapdom.style.left = x + 'px';
   previewWrapdom.style.top = y + 'px';
-  // 关键：仅拖拽预览框时阻止，不加全局强制阻断
   e.preventDefault();
 }
 // 抽离touchend处理函数
