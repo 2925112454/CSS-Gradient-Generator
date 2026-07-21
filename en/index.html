@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSS Gradient Tool | More Than CSS | BrokenBottle PHP</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>CSS Gradient Tool - CSS Goes Beyond Basics | Powered by Popingzi PHP</title>
 <script>
 (function(){
   try {
@@ -35,17 +34,28 @@
 <script src="js/message.js"></script>
 <div class="container">
 <div class="h1">
-    <h1>BrokenBottle PHP - CSS Gradient Generator</h1>
+    <h1>CSS Gradient Code Visualization Tool</h1>
     <button class="darkbut"><i class="ri-moon-line"></i><span class="msgtitle">Toggle Theme</span></button>
 </div>
 <div class="main-wrap">
+<!-- Preview Area -->
 <div class="preview-box">
 <div class="preview-wrap">
-<div id="preview"></div>
+<div id="preview">
+  <span id="previewspan">POPINGZI<br/>Open Color</span>
+</div>
 </div>
 <div class="code-area" id="cssCode">background: linear-gradient(45deg, rgba(79,172,254,1) 0%, rgba(0,242,254,1) 100%);</div>
 
-<div class="group-title">Background Tile Settings</div>
+<!-- Global Tiling Configuration -->
+ <div class="group-title">Gradient Display Mode</div>
+ <div class="row">
+    <select id="globalBgRepeat">
+        <option value="box">Box Gradient</option>
+        <option value="text">Text Gradient</option>
+    </select>
+</div>
+<div class="group-title">Background Tiling Settings</div>
 <div class="row">
     <label>Background Size</label>
     <input type="text" id="globalBgSize" placeholder="20px 20px,100% 100%">
@@ -57,12 +67,15 @@
 
 <button class="btn btn-copy" id="copyBtn"><i class="ri-file-copy-line"></i> Copy CSS Code</button>
 
+<!-- Preset Area -->
 <div class="preset-wrap">
     <div class="group-title">Gradient Presets</div>
     <div class="preset-grid" id="presetBox"></div>
 </div>
 </div>
 
+<!-- Right Control Panel Only -->
+ 
 <div class="control-panel">
 <div class="group-title">Gradient Layers</div>
 <div class="layer-list" id="layerList"></div>
@@ -76,6 +89,8 @@
     <option value="repeating-linear">Repeating Linear</option>
     <option value="radial">Radial Gradient</option>
     <option value="repeating-radial">Repeating Radial</option>
+    <option value="conic">Conic Gradient</option>
+    <option value="repeating-conic">Repeating Conic</option>
 </select>
 </div>
 
@@ -96,7 +111,7 @@
 </select>
 </div>
 <div class="row">
-<label>Size Keyword</label>
+<label>Size</label>
 <select id="radSize">
 <option value="closest-side">closest-side</option>
 <option value="farthest-side">farthest-side</option>
@@ -116,13 +131,34 @@
 </div>
 </div>
 
-<div class="group-title">Color Stops (Drag Sliders To Adjust Position)</div>
+<!-- Conic Gradient Configuration Panel -->
+<div id="conicConfig" style="display: none;">
+  <div class="row">
+    <label>Start Angle</label>
+    <input type="range" id="conicAngleRange" min="0" max="360" value="0">
+    <input type="number" id="conicAngleNum" min="0" max="360" value="0">
+  </div>
+  <div class="row">
+    <label>Center X %</label>
+    <input type="range" id="conicXRange" min="0" max="100" value="50">
+    <input type="number" id="conicXNum" min="0" max="100" value="50">
+  </div>
+  <div class="row">
+    <label>Center Y %</label>
+    <input type="range" id="conicYRange" min="0" max="100" value="50">
+    <input type="number" id="conicYNum" min="0" max="100" value="50">
+  </div>
+</div>
+
+
+<div class="group-title">Color Stops <span>(Drag sliders to adjust position; right-click to distribute sliders evenly.)</span></div>
 <div class="stop-drag-track" id="stopTrack"></div>
 <div class="color-stop-list" id="stopList"></div>
 <button class="btn btn-add-stop" id="addStopBtn"><i class="ri-add-large-line"></i> Add Color Stop</button>
 </div>
 </div>
 </div>
+<!-- Context Menu -->
 <div class="context-menu" id="layerCtx">
     <div data-action="copy">Duplicate Layer</div>
     <div data-action="paste">Paste Layer</div>
@@ -130,10 +166,10 @@
     <div data-action="del">Delete Layer</div>
 </div>
 <div class="context-menu" id="stopCtx">
-    <div data-action="copy">Duplicate Stop</div>
-    <div data-action="paste">Paste Stop</div>
+    <div data-action="copy">Duplicate Color Stop</div>
+    <div data-action="paste">Paste Color Stop</div>
     <div class="sep"></div>
-    <div data-action="del">Delete Stop</div>
+    <div data-action="del">Delete Color Stop</div>
 </div>
 <script src="js/cssCode.js"></script>
 </body>

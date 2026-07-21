@@ -1,3 +1,4 @@
+// CSS渐变预设
 const presets = [
     { grad: 'background: radial-gradient(circle farthest-corner at 0% 0%, rgba(255,0,200,0.4) 0%, rgba(0,0,0,0) 44%), linear-gradient(182deg, rgba(0,7,102,1) 0%, rgba(0,0,0,1) 100%);' },
     { grad: 'background: radial-gradient(circle farthest-side at 100% 100%, rgba(255,187,0,0.7) 0%, rgba(0,0,0,0) 37%), radial-gradient(circle farthest-side at 0% 0%, rgba(255,0,187,0.5) 3%, rgba(0,0,0,0) 30%, rgba(255,255,255,0.5) 40%, rgba(0,0,0,0) 50%), linear-gradient(360deg, rgba(79,172,254,1) 0%, rgba(0,255,238,1) 36%, rgba(255,255,255,1) 100%);' },
@@ -32,5 +33,8 @@ const presets = [
     {grad:'background: repeating-radial-gradient(circle farthest-corner at 91% 0%, rgba(255,255,255,0.3) 23%, rgba(255,255,255,0.2) 36%), linear-gradient(45deg, rgba(0,132,255,1) 0%, rgba(200,0,255,1) 100%);'},
     {grad:'background: radial-gradient(circle closest-side at 50% 50%, rgba(0,0,0,0) 0%, rgba(128,255,0,0.7) 50%, rgba(0,0,0,0) 100%), repeating-radial-gradient(circle closest-side at 50% 50%, rgba(0,0,0,0) 40%, rgba(255,247,0,1) 50%, rgba(0,0,0,0) 60%), linear-gradient(45deg, rgba(0,0,0,1) 100%, rgba(0,0,0,0) 0%);background-size: 50px 50px;'},
     {grad:'background: repeating-radial-gradient(ellipse farthest-corner at 0% 0%, rgba(30,0,255,0.4) 0%, rgba(251,0,255,0.4) 8%, rgba(255,255,255,0.3) 17%), repeating-radial-gradient(ellipse farthest-corner at 99% 1%, rgba(0,157,255,0.5) 0%, rgba(255,0,0,0.5) 8%, rgba(0,8,255,0.1) 17%), repeating-radial-gradient(circle farthest-corner at 99% 100%, rgba(255,234,0,0) 0%, rgba(0,17,255,0.8) 14%), linear-gradient(360deg, rgba(255,255,255,1) 0%, rgba(0,0,0,0) 100%), linear-gradient(45deg, rgba(255,123,0,1) 0%, rgba(0,255,251,0.8) 100%);'},
+    {grad:'background: repeating-conic-gradient(from 360deg at 50% 50%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 1%), conic-gradient(from 360deg at 50% 50%, rgba(255,0,0,1) 0%, rgba(255,162,0,1) 17%, rgba(255,221,0,1) 33%, rgba(0,255,42,1) 50%, rgba(0,255,238,1) 67%, rgba(0,98,255,1) 83%, rgba(238,0,255,1) 100%);'},
+    {grad:'background: repeating-conic-gradient(from 90deg at 48% 50%, rgba(0,17,255,0.5) 0%, rgba(255,0,89,1) 2%, rgba(0,0,0,0) 34%), repeating-conic-gradient(from 67deg at 50% 50%, rgba(0,64,255,1) 0%, rgba(0,123,255,1) 2%);'},
+    {grad:'background: repeating-conic-gradient(from 48deg at 100% 100%, rgba(179,122,0,0.5) 0%, rgba(255,251,204,0.3) 37%), repeating-conic-gradient(from 48deg at 50% 50%, rgba(255,255,255,1) 0%, rgba(189,144,46,1) 0%, rgba(255,249,184,1) 37%);background-size: 50px 50px;'},
 ];
 

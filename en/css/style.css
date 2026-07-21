@@ -1,41 +1,41 @@
 html.dark {
-    --bg-color: #12141d;/*body背景颜色*/
-    --h1-color: #70a1ff;/*标题颜色*/
-    --text-color: #b0c4ff;/*文本颜色*/
-    --box-bg: #1e2230;/*预览区及控制面板背景*/
-    --box-shadow: 0px 5px 12px rgb(0 0 0 / 50%);/*预览区及控制面板阴影*/
-    --layer-item-bg-color: #2c3142;/*图层及色标背景*/
-    --layer-item-text-color:#ffffff;/*图层及色标文本颜色*/
-    --del-bg-color: #ff2727;/*删除按钮背景*/
-    --del-color: #fff;/*删除按钮文本颜色*/
-    --code-bg-color: #0f1119;/*css代码区域背景*/
-    --code-text-color: #89ddff;/*css代码区域文本颜色*/
-    --input-bg-color: #2c3142;/*输入框背景*/
-    --input-border-color: #1e2230;/*输入框边框颜色*/
-    --input-placeholder-color: #8d8d8d;/*输入框占位符颜色*/
-    --input-focus-border-color: #70a1ff;/*输入框聚焦边框颜色*/
-    --input-text-color: #fff;/*输入框文本颜色*/
-    --select-bg-color: #2c3142;/*下拉框背景*/
-    --select-border-color: #444a60;/*下拉框边框颜色*/
-    --select-text-color: #fff;/*下拉框文本颜色*/
-    --border-color: #1e2230;/*边框颜色*/
-    --focus-border-color: #70a1ff;/*选中图层及色标边框颜色*/
-    --newbut-bg-color: #6c5ce7;/*新建图层按钮背景*/
-    --newbut-color: #fff;/*新建图层按钮文本颜色*/
-    --newcolor-bg-color: #2ed573;/*新建色标按钮背景*/
-    --newcolor-color: #fff;/*新建色标按钮文本颜色*/
-    --copybut-bg-color: #6c5ce7;/*复制css代码按钮背景*/
-    --copybut-color: #fff;/*复制css代码按钮文本颜色*/
-    --tip-text-color: #b1b1b1;/*提示文本颜色*/
-    --preview-bg: linear-gradient(45deg, rgba(10, 10, 10, 1) 25%, rgba(28, 28, 28, 0) 25%, rgba(28, 28, 28, 0) 75%, rgba(10, 10, 10, 1) 75%), linear-gradient(45deg, rgba(10, 10, 10, 1) 25%, rgba(28, 28, 28, 1) 25%, rgba(28, 28, 28, 1) 75%, rgba(10, 10, 10, 1) 75%);/*预览区背景(默认网格，方便透明元素查看)*/
-    --preview-box-shadow: 0px 5px 12px rgb(0 0 0 / 50%);/*预览区阴影*/
-    --range-bg-color: #444a60;/*滑块轨道颜色*/
-    --range-thumb-color: #6c5ce7;/*滑块圆点颜色*/
-    --message-text-color: #ffffff;/* 警告框文字颜色 */
-    --message-info-bg-color: rgb(0, 81, 255);/* 警告info背景颜色 */
-    --message-warning-bg-color: #ff4800;/* 警告warning背景颜色 */
-    --message-error-bg-color: #e60000;/* 警告error背景颜色 */
-    --message-success-bg-color: #009b08;/* 警告success背景颜色 */
+    --bg-color: #12141d;/*body background color*/
+    --h1-color: #70a1ff;/*heading color*/
+    --text-color: #b0c4ff;/*text color*/
+    --box-bg: #1e2230;/*preview area and control panel background*/
+    --box-shadow: 0px 5px 12px rgb(0 0 0 / 50%);/*preview area and control panel shadow*/
+    --layer-item-bg-color: #2c3142;/*layer and color stop background*/
+    --layer-item-text-color:#ffffff;/*layer and color stop text color*/
+    --del-bg-color: #ff2727;/*delete button background*/
+    --del-color: #fff;/*delete button text color*/
+    --code-bg-color: #0f1119;/*css code area background*/
+    --code-text-color: #89ddff;/*css code area text color*/
+    --input-bg-color: #2c3142;/*input background*/
+    --input-border-color: #1e2230;/*input border color*/
+    --input-placeholder-color: #8d8d8d;/*input placeholder color*/
+    --input-focus-border-color: #70a1ff;/*input focused border color*/
+    --input-text-color: #fff;/*input text color*/
+    --select-bg-color: #2c3142;/*select dropdown background*/
+    --select-border-color: #444a60;/*select dropdown border color*/
+    --select-text-color: #fff;/*select dropdown text color*/
+    --border-color: #1e2230;/*border color*/
+    --focus-border-color: #70a1ff;/*selected layer and color stop border color*/
+    --newbut-bg-color: #6c5ce7;/*new layer button background*/
+    --newbut-color: #fff;/*new layer button text color*/
+    --newcolor-bg-color: #2ed573;/*new color stop button background*/
+    --newcolor-color: #fff;/*new color stop button text color*/
+    --copybut-bg-color: #6c5ce7;/*copy css code button background*/
+    --copybut-color: #fff;/*copy css code button text color*/
+    --tip-text-color: #b1b1b1;/*hint text color*/
+    --preview-bg: linear-gradient(45deg, rgba(10, 10, 10, 1) 25%, rgba(28, 28, 28, 0) 25%, rgba(28, 28, 28, 0) 75%, rgba(10, 10, 10, 1) 75%), linear-gradient(45deg, rgba(10, 10, 10, 1) 25%, rgba(28, 28, 28, 1) 25%, rgba(28, 28, 28, 1) 75%, rgba(10, 10, 10, 1) 75%);/*preview area background(default checkerboard grid for transparent element preview)*/
+    --preview-box-shadow: 0px 5px 12px rgb(0 0 0 / 50%);/*preview area shadow*/
+    --range-bg-color: #444a60;/*slider track color*/
+    --range-thumb-color: #6c5ce7;/*slider thumb color*/
+    --message-text-color: #ffffff;/* toast message text color */
+    --message-info-bg-color: rgb(0, 81, 255);/* info toast background color */
+    --message-warning-bg-color: #ff4800;/* warning toast background color */
+    --message-error-bg-color: #e60000;/* error toast background color */
+    --message-success-bg-color: #009b08;/* success toast background color */
 }
 :root{
     --bg-color: #e9e9e9;
@@ -88,6 +88,10 @@ html.dark {
     -ms-user-select: none;
     -o-user-select: none;
 }
+input,textarea,select{
+    user-select: text;
+    -webkit-user-select: text;
+}
 body {
     background: var(--bg-color);
     color: var(--text-color);
@@ -137,11 +141,7 @@ h1{
     touch-action: none;
     user-select: none;
 }
-.stop-drag-thumb {
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-}
+
 @media(max-width:920px) {
     .main-wrap {
         flex-direction: column;
@@ -151,10 +151,12 @@ h1{
     }
     .preview-wrap{
         position: fixed !important;
-        top: 25px !important;
-        left: 25px !important;
-        width: 80% !important;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 85% !important;
         height: 20% !important;
+        -webkit-user-drag: element;
+        user-drag: element;
     }
     .darkbut{
         right: 15px;
@@ -164,12 +166,20 @@ h1{
         flex-direction: column;
     }
     h1{
-        padding: 15px !important;
+        padding: 30px 15px 15px 15px !important;
         width: auto !important;
         max-width: 100% !important;
     }
     .message{
         font-size: 12px;
+    }
+    #preview span{
+        font-size:5.5em !important;
+    }
+}
+@media(max-width:500px) {
+    #preview span{
+        font-size:2.5em !important;
     }
 }
 button{
@@ -217,9 +227,23 @@ button:hover{
     inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: 10px
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
-
+#preview span{
+    background-image: radial-gradient(circle, orange, purple);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 7.5em;
+    font-weight: bold;
+    display: none;
+    text-align: center;
+    line-height: 1;
+}
 .code-area {
     background: var(--code-bg-color);
     padding: 16px;
@@ -323,7 +347,9 @@ button:hover{
 .group-title:first-child {
     margin-top: 0
 }
-
+.group-title span{
+    font-size: 12px;
+}
 .row {
     display: flex;
     align-items: center;
@@ -385,7 +411,7 @@ input[type="range"]::-moz-range-track {
 
 #gradType,
 #radShape,
-#radSize {
+#radSize,#globalBgRepeat{
     padding: 8px 10px;
     background: var(--select-bg-color);
     border: 1px solid var(--select-border-color);
@@ -483,7 +509,7 @@ input[type=number] {
     border-radius: 4px;
     top: -4px;
     transform: translateX(-50%);
-    cursor: ew-resize
+    cursor: ew-resize;
 }
 
 .stop-drag-thumb.active-thumb {
