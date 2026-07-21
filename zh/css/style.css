@@ -1,4 +1,4 @@
-html.dark {
+html.dark{
     --bg-color: #12141d;/*body背景颜色*/
     --h1-color: #70a1ff;/*标题颜色*/
     --text-color: #b0c4ff;/*文本颜色*/
@@ -454,9 +454,15 @@ input[type=number] {
 .layer-item.drag-over {
     background: var(--layer-item-bg-color);
     transform: translateX(-10px);
+    opacity: 0.5;
+    border:1px dashed var(--focus-border-color);
     transition: all 0.3s ease-in-out;
+    box-shadow: 0 0 5px var(--focus-border-color);
 }
-
+.layer-item.dragging-source {
+    opacity: 0.2;
+    transform: translateX(0px);
+}
 .layer-head {
     display: flex;
     justify-content: space-between;
