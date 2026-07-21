@@ -836,14 +836,38 @@ addStopBtn.onclick = function(){
 }
 
 // Copy code
-copyBtn.onclick = async function(){
-    await navigator.clipboard.writeText(cssCode.innerText);
-    showMessage('CSS code copied successfully!','success');
+async function copyText(text) {
+    // Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (err) {
+           //console.log('Clipboard API err', err);
+        }
+    }
+    return new Promise((resolve) => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        tempInput.style.position = 'absolute';
+        tempInput.style.left = '-9999px';
+        tempInput.style.top = '-9999px';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, text.length);
+        const copyResult = document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        resolve(copyResult);
+    });
 }
-preview.onclick = async function(){
-    await navigator.clipboard.writeText(cssCode.innerText);
-    showMessage('CSS code copied successfully!','success');
+async function handleCopy() {
+    const success = await copyText(cssCode.innerText);
+    if (success) {
+        showMessage('CSS code copied successfully!','success');
+    }
 }
+copyBtn.onclick = handleCopy;
+preview.onclick = handleCopy;
 
 // Angle two-way sync
 angleRange.oninput = function(){
