@@ -845,14 +845,39 @@ addStopBtn.onclick = function(){
     updatePreview();
 }
 // 复制代码
-copyBtn.onclick = async function(){
-    await navigator.clipboard.writeText(cssCode.innerText);
-    showMessage('CSS代码复制成功！','success');
+async function copyText(text) {
+    // 现代Clipboard API优先
+    if (navigator.clipboard && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (err) {
+            // 现代API失败，走降级方案
+           //console.log('Clipboard API失效，降级复制', err);
+        }
+    }
+    return new Promise((resolve) => {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        tempInput.style.position = 'absolute';
+        tempInput.style.left = '-9999px';
+        tempInput.style.top = '-9999px';
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, text.length);
+        const copyResult = document.execCommand('copy');
+        document.body.removeChild(tempInput);
+        resolve(copyResult);
+    });
 }
-preview.onclick = async function(){
-    await navigator.clipboard.writeText(cssCode.innerText);
-    showMessage('CSS代码复制成功！','success');
+async function handleCopy() {
+    const success = await copyText(cssCode.innerText);
+    if (success) {
+        showMessage('CSS代码复制成功！', 'success');
+    }
 }
+copyBtn.onclick = handleCopy;
+preview.onclick = handleCopy;
 // 角度双向同步
 angleRange.oninput = function(){
     angleNum.value = this.value;
