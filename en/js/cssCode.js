@@ -15,7 +15,7 @@ let layers = [
         ]
     }
 ];
-// Global background size & position
+// Global background size and position
 let bgSizeValue = '';
 let bgPosValue = '';
 let activeLayerIndex = 0;
@@ -23,7 +23,28 @@ let copyLayerData = null;
 let copyStopData = null;
 let dragLayerIdx = null;
 let dragStopIdx = null;
-// DOM
+
+// ===== Mobile touch interaction variables =====
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let touchDragLayerIdx = null;
+let isLayerTouchDragging = false;
+let longPressTimer = null;
+const LONG_PRESS_MS = 300;    // Time threshold for long press to trigger drag
+const TAP_MOVE_THRESHOLD = 20; // Maximum movement pixels allowed for tap
+const DOUBLE_TAP_MS = 350;     // Double tap time threshold
+let ignoreNextClick = false;
+
+// Double tap state is independent for each module to avoid interference
+let lastLayerTapTime = 0;
+let lastLayerTapIndex = -1;
+let lastStopItemTapTime = 0;
+let lastStopItemTapIndex = -1;
+let lastStopTapTime = 0;
+let lastStopTapIndex = -1;
+
+// DOM elements
 const preview = document.getElementById('preview');
 const cssCode = document.getElementById('cssCode');
 const layerList = document.getElementById('layerList');
@@ -60,19 +81,19 @@ const conicYNum = document.getElementById('conicYNum');
 const previewspan = document.getElementById('previewspan');
 const globalBgRepeat = document.getElementById('globalBgRepeat');
 
-// Update only slider positions and selection state
+// Only update thumb position and selected state
 function updateStopThumbsPosition() {
   const stops = layers[activeLayerIndex].stops;
   const thumbs = stopTrack.querySelectorAll('.stop-drag-thumb');
   thumbs.forEach((thumb, idx) => {
     if (!stops[idx]) return;
     thumb.style.left = stops[idx].pos + '%';
-    // Toggle active highlight
+    // Toggle selected highlight
     thumb.classList.toggle('active-thumb', idx === dragStopIdx);
   });
 }
 
-// Split string by comma, ignoring commas inside parentheses
+// Split string by commas, ignoring commas inside parentheses
 function splitByCommaIgnoreBrackets(str) {
     const result = [];
     let stack = 0;
@@ -81,14 +102,14 @@ function splitByCommaIgnoreBrackets(str) {
         const char = str[i];
         if (char === '(') stack++;
         if (char === ')') stack--;
-        // Split only at commas outside parentheses
+        // Only split at commas outside parentheses
         if (stack === 0 && char === ',') {
             const segment = str.slice(segmentStart, i).trim();
             if (segment) result.push(segment);
             segmentStart = i + 1;
         }
     }
-    // Handle last segment
+    // Process the last segment
     const lastSegment = str.slice(segmentStart).trim();
     if (lastSegment) result.push(lastSegment);
     return result;
@@ -99,9 +120,35 @@ function hideAllCtx(){
     layerCtx.style.display = 'none';
     stopCtx.style.display = 'none';
 }
-document.addEventListener('click',hideAllCtx);
 
-// Hex to rgba
+// Adjust context menu position to avoid going beyond screen boundaries
+function adjustCtxPosition(ctxEl, x, y) {
+    ctxEl.style.visibility = 'hidden';
+    ctxEl.style.display = 'block';
+    const rect = ctxEl.getBoundingClientRect();
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+    let finalX = x;
+    let finalY = y;
+    if (x + rect.width > viewW) finalX = viewW - rect.width - 5;
+    if (y + rect.height > viewH) finalY = viewH - rect.height - 5;
+    ctxEl.style.left = finalX + 'px';
+    ctxEl.style.top = finalY + 'px';
+    ctxEl.style.visibility = 'visible';
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('#layerCtx') || e.target.closest('#stopCtx')) {
+        return;
+    }
+    if (ignoreNextClick) {
+        ignoreNextClick = false;
+        return;
+    }
+    hideAllCtx();
+});
+
+// Convert hex to rgba
 function hexToRgba(hex, aPct){
     const r = parseInt(hex.slice(1,3),16);
     const g = parseInt(hex.slice(3,5),16);
@@ -126,7 +173,6 @@ function renderPresets(){
         wrap.className = 'preset-item';
         const inner = document.createElement('div');
         inner.className = 'preset-inner';
-        // Split full preset style, separate gradient, size, position
         let gradStr = '';
         let sSize = '';
         let sPos = '';
@@ -188,7 +234,7 @@ function loadPreset(fullBgStr){
     updatePreview();
 }
 
-// Split multi-layer gradient stack
+// Stack-based splitting for multi-layer gradients
 function splitMultiGrad(str){
     const result = [];
     let stack = 0;
@@ -199,9 +245,9 @@ function splitMultiGrad(str){
         if(c === '(') stack++;
         if(c === ')') stack--;
         const substr25 = s.slice(i, i + 25);
-        const substr24 = s.slice(i, i + 24); // repeating-conic length
+        const substr24 = s.slice(i, i + 24); // Repeating conic length
         const substr15 = s.slice(i, i + 15);
-        const substr14 = s.slice(i, i + 14); // conic length
+        const substr14 = s.slice(i, i + 14); // Conic length
         if(
             stack === 0 && startIdx === -1 &&
             (
@@ -265,7 +311,7 @@ function parseSingleGrad(gStr) {
     }
     const rawParts = splitByCommaIgnoreBrackets(bracketMatch[1]);
     let colorStartIdx = 0;
-    // Linear gradient parse
+    // Parse linear gradient
     if (layer.type === 'linear' || layer.type === 'repeating-linear') {
         const degMatch = rawParts[0].match(/^\s*(\d+)\s*deg\s*$/);
         if (degMatch) {
@@ -273,7 +319,7 @@ function parseSingleGrad(gStr) {
             colorStartIdx = 1;
         }
     } 
-    // Radial gradient parse
+    // Parse radial gradient
     else if (layer.type === 'radial' || layer.type === 'repeating-radial') {
         const firstItem = rawParts[0] || '';
         const shapeList = ['circle', 'ellipse'];
@@ -307,13 +353,13 @@ function parseSingleGrad(gStr) {
         }
         colorStartIdx = hasConfig ? 1 : 0;
     }
-    // Conic gradient parse
+    // Parse conic gradient
     else {
         const firstItem = rawParts[0] || '';
         let hasConfig = false;
         const configParts = firstItem.split(/\s+/).filter(Boolean);
         let ptr = 0;
-        // Parse from start angle
+        // Parse starting angle from 'from'
         if (ptr < configParts.length && configParts[ptr] === 'from') {
             ptr++;
             hasConfig = true;
@@ -323,7 +369,7 @@ function parseSingleGrad(gStr) {
                 ptr++;
             }
         }
-        // Parse at center position
+        // Parse center position from 'at'
         if (ptr < configParts.length && configParts[ptr] === 'at') {
             ptr++;
             hasConfig = true;
@@ -340,7 +386,7 @@ function parseSingleGrad(gStr) {
         }
         colorStartIdx = hasConfig ? 1 : 0;
     }
-    // Color stop parse
+    // Parse color stops
     const colorItems = rawParts.slice(colorStartIdx);
     for (const seg of colorItems) {
         let hex = '#ffffff', alpha = 100, pos = 50;
@@ -421,7 +467,7 @@ function renderLayerList(){
             dragLayerIdx = idx;
             layerCtx.style.left = e.clientX + 'px';
             layerCtx.style.top = e.clientY + 'px';
-            layerCtx.style.display = 'block';
+            adjustCtxPosition(layerCtx, e.clientX, e.clientY);
         }
         item.ondragstart = function(){ dragLayerIdx = idx; }
         item.ondragover = function(e){
@@ -447,13 +493,142 @@ function renderLayerList(){
             renderStopList();
             updatePreview();
         }
+
+        // ===== Mobile layer touch interaction: single tap to select, double tap for menu, long press to drag =====
+        item.addEventListener('touchstart', function(e) {
+            if (e.target.closest('.del-layer')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+            touchDragLayerIdx = idx;
+            // Long press timer: enter drag mode after timeout
+            longPressTimer = setTimeout(() => {
+                isLayerTouchDragging = true;
+                item.classList.add('dragging-source');// Drag source element detachment effect
+                if (navigator.vibrate) navigator.vibrate(50); // Vibration feedback
+            }, LONG_PRESS_MS);
+        }, { passive: true });
+
+        item.addEventListener('touchmove', function(e) {
+            if (touchDragLayerIdx === null) return;
+            const touch = e.touches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            // Cancel long press detection if movement exceeds threshold
+            if (!isLayerTouchDragging && (moveX > TAP_MOVE_THRESHOLD || moveY > TAP_MOVE_THRESHOLD)) {
+                clearTimeout(longPressTimer);
+            }
+            // Drag mode: highlight target layer in real time
+            if (isLayerTouchDragging) {
+                e.preventDefault();
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetItem = elemBelow?.closest('.layer-item');
+                document.querySelectorAll('.layer-item').forEach(el => el.classList.remove('drag-over'));
+                if (targetItem && targetItem.dataset.idx != idx) {
+                    targetItem.classList.add('drag-over');
+                }
+            }
+        }, { passive: false });
+
+        item.addEventListener('touchend', function(e) {
+            clearTimeout(longPressTimer);
+            const touch = e.changedTouches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            const duration = Date.now() - touchStartTime;
+
+            // Long press drag ends → perform sorting
+            if (isLayerTouchDragging) {
+                const elemBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const targetItem = elemBelow?.closest('.layer-item');
+                if (targetItem) {
+                    const targetIdx = Number(targetItem.dataset.idx);
+                    if (touchDragLayerIdx !== null && touchDragLayerIdx !== targetIdx) {
+                        const temp = layers[touchDragLayerIdx];
+                        layers.splice(touchDragLayerIdx, 1);
+                        layers.splice(targetIdx, 0, temp);
+                        // Sync active layer index
+                        if (activeLayerIndex === touchDragLayerIdx) {
+                            activeLayerIndex = targetIdx;
+                        } else if (touchDragLayerIdx < activeLayerIndex && targetIdx >= activeLayerIndex) {
+                            activeLayerIndex--;
+                        } else if (touchDragLayerIdx > activeLayerIndex && targetIdx <= activeLayerIndex) {
+                            activeLayerIndex++;
+                        }
+                    }
+                }
+                // Reset state
+                isLayerTouchDragging = false;
+                touchDragLayerIdx = null;
+                document.querySelectorAll('.layer-item').forEach(el => {
+                    el.classList.remove('drag-over');
+                    el.classList.remove('dragging-source');
+                });
+                renderLayerList();
+                syncLayerToControl();
+                renderStopDragTrack();
+                renderStopList();
+                updatePreview();
+                return;
+            }
+
+            // Short tap detection
+            if (duration < LONG_PRESS_MS && moveX < TAP_MOVE_THRESHOLD && moveY < TAP_MOVE_THRESHOLD) {
+                if (e.target.closest('.del-layer')) return;
+                const now = Date.now();
+                const timeDiff = now - lastLayerTapTime;
+
+                // Double tap same layer → show action menu
+                if (timeDiff < DOUBLE_TAP_MS && lastLayerTapIndex === idx) {
+                    activeLayerIndex = idx;
+                    dragLayerIdx = idx;
+                    renderLayerList();
+                    syncLayerToControl();
+                    renderStopDragTrack();
+                    renderStopList();
+                    updatePreview();
+                    hideAllCtx();
+                    ignoreNextClick = true;
+                    layerCtx.style.left = touch.clientX + 'px';
+                    layerCtx.style.top = touch.clientY + 'px';
+                    adjustCtxPosition(layerCtx, touch.clientX, touch.clientY);
+                    lastLayerTapTime = 0;
+                    lastLayerTapIndex = -1;
+                } else {
+                    // Single tap → only select layer
+                    activeLayerIndex = idx;
+                    renderLayerList();
+                    syncLayerToControl();
+                    renderStopDragTrack();
+                    renderStopList();
+                    updatePreview();
+                    // Record single tap state, wait for second tap
+                    lastLayerTapTime = now;
+                    lastLayerTapIndex = idx;
+                }
+            }
+
+            touchDragLayerIdx = null;
+        });
+
+        item.addEventListener('touchcancel', function() {
+            clearTimeout(longPressTimer);
+            isLayerTouchDragging = false;
+            touchDragLayerIdx = null;
+            document.querySelectorAll('.layer-item').forEach(el => {
+                el.classList.remove('drag-over');
+                el.classList.remove('dragging-source');
+            });
+        });
+
         layerList.appendChild(item);
     })
     document.querySelectorAll('.del-layer').forEach(btn=>{
         btn.onclick = function(e){
             e.stopPropagation();
             const i = Number(this.dataset.idx);
-            if(layers.length <= 1) return showMessage('At least 1 gradient layer is required','warning');
+            if(layers.length <= 1) return showMessage('At least 1 gradient layer must be kept','warning');
             layers.splice(i,1);
             if(activeLayerIndex >= layers.length) activeLayerIndex = layers.length - 1;
             renderLayerList();
@@ -464,7 +639,6 @@ function renderLayerList(){
         }
     })
 }
-
 // Layer context menu
 layerCtx.querySelectorAll('div[data-action]').forEach(el=>{
     el.onclick = function(){
@@ -479,7 +653,7 @@ layerCtx.querySelectorAll('div[data-action]').forEach(el=>{
             renderLayerList();
             updatePreview();
         }else if(act === 'del'){
-            if(layers.length <= 1) return showMessage('At least 1 gradient layer is required','warning');
+            if(layers.length <= 1) return showMessage('At least 1 gradient layer must be kept','warning');
             layers.splice(idx,1);
             if(activeLayerIndex >= layers.length) activeLayerIndex = layers.length - 1;
             renderLayerList();
@@ -491,7 +665,6 @@ layerCtx.querySelectorAll('div[data-action]').forEach(el=>{
         hideAllCtx();
     }
 })
-
 // Sync layer to control panel
 function syncLayerToControl(){
     const ly = layers[activeLayerIndex];
@@ -519,15 +692,13 @@ function toggleGradPanel(){
     radialConfig.style.display = (t === 'radial' || t === 'repeating-radial') ? 'block' : 'none';
     conicConfig.style.display = (t === 'conic' || t === 'repeating-conic') ? 'block' : 'none';
 }
-
-// Unified mouse/touch horizontal coordinate getter
+// Unified function to get mouse/touch X coordinate
 function getEventClientX(e) {
   if (e.touches && e.touches.length > 0) {
     return e.touches[0].clientX;
   }
   return e.clientX;
 }
-
 // Color stop drag track
 function renderStopDragTrack() {
   stopTrack.innerHTML = '';
@@ -553,7 +724,7 @@ function renderStopDragTrack() {
       renderStopList();
       updatePreview();
     }
-    // Unified drag end cleanup
+    // Unified cleanup on drag end
     function handleEnd() {
       dragging = false;
       if (unbindMove) unbindMove();
@@ -592,9 +763,24 @@ function renderStopDragTrack() {
     }
     // PC mouse down
     thumb.addEventListener('mousedown', handleStart, { passive: false });
-    // Mobile touch start
-    thumb.addEventListener('touchstart', handleStart, { passive: false });
-    // Context menu (distribute stops evenly)
+    // Mobile touch: double tap to distribute evenly + single tap to drag
+    thumb.addEventListener('touchstart', function(e) {
+        const now = Date.now();
+        const timeDiff = now - lastStopTapTime;
+        // Double tap same thumb → trigger even distribution
+        if (timeDiff < DOUBLE_TAP_MS && lastStopTapIndex === idx) {
+            e.preventDefault();
+            distributeStopsEvenly();
+            lastStopTapTime = 0;
+            lastStopTapIndex = -1;
+            return;
+        }
+        // Single tap → record state, enter drag normally
+        lastStopTapTime = now;
+        lastStopTapIndex = idx;
+        handleStart.call(this, e);
+    }, { passive: false });
+    // PC right-click to distribute evenly
     thumb.oncontextmenu = function (e) {
       e.preventDefault();
       distributeStopsEvenly();
@@ -602,7 +788,6 @@ function renderStopDragTrack() {
     stopTrack.appendChild(thumb);
   });
 }
-
 // Render color stop list
 function renderStopList(){
     const ly = layers[activeLayerIndex];
@@ -638,8 +823,50 @@ function renderStopList(){
             renderStopList();
             stopCtx.style.left = e.clientX + 'px';
             stopCtx.style.top = e.clientY + 'px';
-            stopCtx.style.display = 'block';
+            adjustCtxPosition(stopCtx, e.clientX, e.clientY);
         }
+
+        // ===== Mobile color stop item touch interaction: single tap to select, double tap for menu =====
+        item.addEventListener('touchstart', function(e) {
+            if (e.target.closest('input') || e.target.closest('button')) return;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        }, { passive: true });
+
+        item.addEventListener('touchend', function(e) {
+            if (e.target.closest('input') || e.target.closest('button')) return;
+            const touch = e.changedTouches[0];
+            const moveX = Math.abs(touch.clientX - touchStartX);
+            const moveY = Math.abs(touch.clientY - touchStartY);
+            const duration = Date.now() - touchStartTime;
+
+            if (duration < LONG_PRESS_MS && moveX < TAP_MOVE_THRESHOLD && moveY < TAP_MOVE_THRESHOLD) {
+                const now = Date.now();
+                const timeDiff = now - lastStopItemTapTime;
+                // Double tap same color stop item → show action menu
+                if (timeDiff < DOUBLE_TAP_MS && lastStopItemTapIndex === idx) {
+                    dragStopIdx = idx;
+                    renderStopDragTrack();
+                    renderStopList();
+                    hideAllCtx();
+                    ignoreNextClick = true;
+                    stopCtx.style.left = touch.clientX + 'px';
+                    stopCtx.style.top = touch.clientY + 'px';
+                    adjustCtxPosition(stopCtx, touch.clientX, touch.clientY);
+                    lastStopItemTapTime = 0;
+                    lastStopItemTapIndex = -1;
+                } else {
+                    dragStopIdx = idx;
+                    renderStopDragTrack();
+                    renderStopList();
+                    lastStopItemTapTime = now;
+                    lastStopItemTapIndex = idx;
+                }
+            }
+        });
+
         stopList.appendChild(item);
     })
     document.querySelectorAll('input[type="color"]').forEach(inp=>{
@@ -684,7 +911,7 @@ function renderStopList(){
         btn.onclick = function(){
             const sidx = Number(this.dataset.sidx);
             const stops = layers[activeLayerIndex].stops;
-            if(stops.length <= 2) return showMessage('At least 2 color stops per layer','warning');
+            if(stops.length <= 2) return showMessage('At least 2 color stops must be kept','warning');
             stops.splice(sidx,1);
             if(dragStopIdx >= stops.length) dragStopIdx = stops.length - 1;
             renderStopDragTrack();
@@ -694,7 +921,7 @@ function renderStopList(){
     })
 }
 
-// Distribute all color stops evenly on current layer
+// Distribute all color stop positions evenly for current layer
 function distributeStopsEvenly() {
     const stops = layers[activeLayerIndex].stops;
     const total = stops.length;
@@ -756,13 +983,13 @@ function buildSingleGradient(layer){
     }
 }
 
-// Build full background
+// Build complete background
 function generateFullBackground(){
     const reversedLayers = [...layers].reverse();
     const allGrads = reversedLayers.map(l=>buildSingleGradient(l)).join(', ');
     const mode = globalBgRepeat.value;
     let css = `background: ${allGrads};`;
-    // Global size & position
+    // Global size and position
     const sizeTxt = bgSizeValue.trim();
     const posTxt = bgPosValue.trim();
     if(sizeTxt){
@@ -806,7 +1033,7 @@ function updatePreview(){
     cssCode.innerText = fullCode;
 }
 
-// Add layer
+// Add new layer
 addLayerBtn.onclick = function(){
     layers.push({
         type:'linear',
@@ -827,7 +1054,7 @@ addLayerBtn.onclick = function(){
     updatePreview();
 }
 
-// Add color stop
+// Add new color stop
 addStopBtn.onclick = function(){
     layers[activeLayerIndex].stops.push({hex:'#ffffff',alpha:100,pos:50});
     renderStopDragTrack();
@@ -837,13 +1064,14 @@ addStopBtn.onclick = function(){
 
 // Copy code
 async function copyText(text) {
-    // Clipboard API
+    // Prioritize modern Clipboard API
     if (navigator.clipboard && window.isSecureContext) {
         try {
             await navigator.clipboard.writeText(text);
             return true;
         } catch (err) {
-           //console.log('Clipboard API err', err);
+            // Modern API failed, use fallback
+           //console.log('Clipboard API failed, fallback copy', err);
         }
     }
     return new Promise((resolve) => {
@@ -863,13 +1091,12 @@ async function copyText(text) {
 async function handleCopy() {
     const success = await copyText(cssCode.innerText);
     if (success) {
-        showMessage('CSS code copied successfully!','success');
+        showMessage('CSS code copied successfully!', 'success');
     }
 }
 copyBtn.onclick = handleCopy;
 preview.onclick = handleCopy;
-
-// Angle two-way sync
+// Two-way sync for angle
 angleRange.oninput = function(){
     angleNum.value = this.value;
     layers[activeLayerIndex].angle = Number(this.value);
@@ -882,8 +1109,7 @@ angleNum.oninput = function(){
     layers[activeLayerIndex].angle = val;
     updatePreview();
 }
-
-// Radial center X/Y sync
+// Two-way sync for radial center X/Y
 radXRange.oninput = function(){
     radXNum.value = this.value;
     layers[activeLayerIndex].radX = Number(this.value);
@@ -921,25 +1147,21 @@ gradType.onchange = function(){
     toggleGradPanel();
     updatePreview();
 }
-
-// Gradient display mode switch
+// Toggle gradient display mode
 globalBgRepeat.onchange = function(){
     updatePreview();
 }
-
 // Global background-size input listener
 globalBgSizeInput.oninput = function(){
     bgSizeValue = this.value.trim();
     updatePreview();
 }
-
 // Global background-position input listener
 globalBgPosInput.oninput = function(){
     bgPosValue = this.value.trim();
     updatePreview();
 }
-
-// Conic start angle two-way sync
+// Two-way sync for conic starting angle
 conicAngleRange.oninput = function(){
     conicAngleNum.value = this.value;
     layers[activeLayerIndex].conicFromAngle = Number(this.value);
@@ -952,8 +1174,7 @@ conicAngleNum.oninput = function(){
     layers[activeLayerIndex].conicFromAngle = val;
     updatePreview();
 }
-
-// Conic center X two-way sync
+// Two-way sync for conic center X
 conicXRange.oninput = function(){
     conicXNum.value = this.value;
     layers[activeLayerIndex].conicX = Number(this.value);
@@ -966,8 +1187,7 @@ conicXNum.oninput = function(){
     layers[activeLayerIndex].conicX = val;
     updatePreview();
 }
-
-// Conic center Y two-way sync
+// Two-way sync for conic center Y
 conicYRange.oninput = function(){
     conicYNum.value = this.value;
     layers[activeLayerIndex].conicY = Number(this.value);
@@ -980,8 +1200,7 @@ conicYNum.oninput = function(){
     layers[activeLayerIndex].conicY = val;
     updatePreview();
 }
-
-// Initialize
+// Initialization
 renderPresets();
 renderLayerList();
 syncLayerToControl();
@@ -989,24 +1208,22 @@ renderStopDragTrack();
 renderStopList();
 toggleGradPanel();
 updatePreview();
-
-// Mobile draggable preview position
+// Make preview area draggable on mobile
 let isDrag = false;
 let offsetX = 0;
 let offsetY = 0;
-// Cache DOM
+// Cache DOM elements
 const previewWrapdom = document.querySelector('.preview-wrap');
-// Extract touchstart handler
+// Extracted touchstart handler
 function handleTouchStart(e) {
   isDrag = true;
   previewWrapdom.style.zIndex = 1;
   const touch = e.touches[0];
   offsetX = touch.clientX - previewWrapdom.offsetLeft;
   offsetY = touch.clientY - previewWrapdom.offsetTop;
-  // Prevent scroll only when dragging self, does not affect other element touches
   e.preventDefault();
 }
-// Extract touchmove handler
+// Extracted touchmove handler
 function handleTouchMove(e) {
   if (!isDrag) return;
   const touch = e.touches[0];
@@ -1014,10 +1231,9 @@ function handleTouchMove(e) {
   const y = touch.clientY - offsetY;
   previewWrapdom.style.left = x + 'px';
   previewWrapdom.style.top = y + 'px';
-  // Key: prevent only when dragging preview box, no global forced block
   e.preventDefault();
 }
-// Extract touchend handler
+// Extracted touchend handler
 function handleTouchEnd() {
   isDrag = false;
   previewWrapdom.style.zIndex = 1;
@@ -1046,8 +1262,7 @@ previewWrapdom.addEventListener('touchstart', function(){
   document.addEventListener('touchmove', tempMove, {passive:false});
   document.addEventListener('touchend', tempEnd);
 });
-
-// Check screen width and execute bind logic
+// Check screen width and execute binding logic
 function checkScreenWidth() {
   if (window.innerWidth < 921) {
     bindTouchDrag();
@@ -1055,7 +1270,7 @@ function checkScreenWidth() {
     unbindTouchDrag();
   }
 }
-// Run once on page init
+// Execute once on page initialization
 checkScreenWidth();
-// Re-check on window resize
+// Re-check when window size changes
 window.addEventListener('resize', checkScreenWidth);
