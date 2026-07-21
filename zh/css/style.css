@@ -88,6 +88,10 @@ html.dark {
     -ms-user-select: none;
     -o-user-select: none;
 }
+input,textarea,select{
+    user-select: text;
+    -webkit-user-select: text;
+}
 body {
     background: var(--bg-color);
     color: var(--text-color);
@@ -137,11 +141,7 @@ h1{
     touch-action: none;
     user-select: none;
 }
-.stop-drag-thumb {
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-}
+
 @media(max-width:920px) {
     .main-wrap {
         flex-direction: column;
@@ -151,10 +151,12 @@ h1{
     }
     .preview-wrap{
         position: fixed !important;
-        top: 25px !important;
-        left: 25px !important;
-        width: 80% !important;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 85% !important;
         height: 20% !important;
+        -webkit-user-drag: element;
+        user-drag: element;
     }
     .darkbut{
         right: 15px;
@@ -164,12 +166,20 @@ h1{
         flex-direction: column;
     }
     h1{
-        padding: 15px !important;
+        padding: 30px 15px 15px 15px !important;
         width: auto !important;
         max-width: 100% !important;
     }
     .message{
         font-size: 12px;
+    }
+    #preview span{
+        font-size:5.5em !important;
+    }
+}
+@media(max-width:500px) {
+    #preview span{
+        font-size:2.5em !important;
     }
 }
 button{
@@ -217,9 +227,23 @@ button:hover{
     inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: 10px
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 }
-
+#preview span{
+    background-image: radial-gradient(circle, orange, purple);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 7.5em;
+    font-weight: bold;
+    display: none;
+    text-align: center;
+    line-height: 1;
+}
 .code-area {
     background: var(--code-bg-color);
     padding: 16px;
@@ -323,7 +347,9 @@ button:hover{
 .group-title:first-child {
     margin-top: 0
 }
-
+.group-title span{
+    font-size: 12px;
+}
 .row {
     display: flex;
     align-items: center;
@@ -385,7 +411,7 @@ input[type="range"]::-moz-range-track {
 
 #gradType,
 #radShape,
-#radSize {
+#radSize,#globalBgRepeat{
     padding: 8px 10px;
     background: var(--select-bg-color);
     border: 1px solid var(--select-border-color);
@@ -483,7 +509,7 @@ input[type=number] {
     border-radius: 4px;
     top: -4px;
     transform: translateX(-50%);
-    cursor: ew-resize
+    cursor: ew-resize;
 }
 
 .stop-drag-thumb.active-thumb {

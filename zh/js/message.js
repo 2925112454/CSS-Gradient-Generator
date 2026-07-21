@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-  /* 警告消息框函数JS文件 */
+  /* 提示组件 */
   /**
    * DOM元素抖动警告动画
    * @param {HTMLElement} el 需要抖动的DOM元素

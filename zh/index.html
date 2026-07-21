@@ -2,9 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>CSS渐变工具 - CSS远不止如此|破瓶子PHP提供</title>
-
 <script>
 (function(){
   try {
@@ -16,7 +15,6 @@
       root.classList.remove('dark');
     }
   }catch(e){
-    // 无痕/隐私模式localStorage不可用时兜底浅色
     document.documentElement.classList.remove('dark');
   }
 })();
@@ -36,18 +34,27 @@
 <script src="js/message.js"></script>
 <div class="container">
 <div class="h1">
-    <h1>破瓶子PHP - CSS渐变生成工具</h1>
+    <h1>CSS渐变代码可视化工具</h1>
     <button class="darkbut"><i class="ri-moon-line"></i><span class="msgtitle">切换主题</span></button>
 </div>
 <div class="main-wrap">
 <!-- 预览区-->
 <div class="preview-box">
 <div class="preview-wrap">
-<div id="preview"></div>
+<div id="preview">
+  <span id="previewspan">POPINGZI<br/>Open Color</span>
+</div>
 </div>
 <div class="code-area" id="cssCode">background: linear-gradient(45deg, rgba(79,172,254,1) 0%, rgba(0,242,254,1) 100%);</div>
 
-<!-- 全局平铺配置（整个背景共用，非单图层） -->
+<!-- 全局平铺配置 -->
+ <div class="group-title">渐变显示模式</div>
+ <div class="row">
+    <select id="globalBgRepeat">
+        <option value="box">盒子渐变</option>
+        <option value="text">文字渐变</option>
+    </select>
+</div>
 <div class="group-title">背景平铺配置</div>
 <div class="row">
     <label>平铺大小</label>
@@ -82,6 +89,8 @@
     <option value="repeating-linear">重复线性</option>
     <option value="radial">径向渐变</option>
     <option value="repeating-radial">重复径向</option>
+    <option value="conic">锥形渐变</option>
+    <option value="repeating-conic">重复锥形</option>
 </select>
 </div>
 
@@ -122,7 +131,27 @@
 </div>
 </div>
 
-<div class="group-title">色标（拖拽滑块调位置）</div>
+<!-- 锥形渐变配置面板 -->
+<div id="conicConfig" style="display: none;">
+  <div class="row">
+    <label>起始角度</label>
+    <input type="range" id="conicAngleRange" min="0" max="360" value="0">
+    <input type="number" id="conicAngleNum" min="0" max="360" value="0">
+  </div>
+  <div class="row">
+    <label>中心X%</label>
+    <input type="range" id="conicXRange" min="0" max="100" value="50">
+    <input type="number" id="conicXNum" min="0" max="100" value="50">
+  </div>
+  <div class="row">
+    <label>中心Y%</label>
+    <input type="range" id="conicYRange" min="0" max="100" value="50">
+    <input type="number" id="conicYNum" min="0" max="100" value="50">
+  </div>
+</div>
+
+
+<div class="group-title">色标<span>（拖拽滑块调位置，右键均分滑块。）</span></div>
 <div class="stop-drag-track" id="stopTrack"></div>
 <div class="color-stop-list" id="stopList"></div>
 <button class="btn btn-add-stop" id="addStopBtn"><i class="ri-add-large-line"></i> 添加色标</button>

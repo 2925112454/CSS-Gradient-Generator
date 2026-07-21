@@ -6,13 +6,17 @@ let layers = [
         radShape: 'circle',
         radSize: 'farthest-corner',
         radX:50, radY:50,
+        conicFromAngle: 0,
+        conicX: 50,
+        conicY: 50,
         stops: [
             {hex:'#2600ff', alpha:100, pos:0},
             {hex:'#fe0055', alpha:100, pos:100}
         ]
     }
 ];
-// 全局背景尺寸、位置（存储文本值，改名区分DOM）
+
+// 全局背景尺寸、位置
 let bgSizeValue = '';
 let bgPosValue = '';
 let activeLayerIndex = 0;
@@ -44,12 +48,32 @@ const copyBtn = document.getElementById('copyBtn');
 const presetBox = document.getElementById('presetBox');
 const layerCtx = document.getElementById('layerCtx');
 const stopCtx = document.getElementById('stopCtx');
-// 全局平铺输入框DOM（保留原名，不再冲突）
 const globalBgSizeInput = document.getElementById('globalBgSize');
 const globalBgPosInput = document.getElementById('globalBgPos');
-// 全局平铺输入框DOM
 const globalBgSize = document.getElementById('globalBgSize');
 const globalBgPos = document.getElementById('globalBgPos');
+const conicConfig = document.getElementById('conicConfig');
+const conicAngleRange = document.getElementById('conicAngleRange');
+const conicAngleNum = document.getElementById('conicAngleNum');
+const conicXRange = document.getElementById('conicXRange');
+const conicXNum = document.getElementById('conicXNum');
+const conicYRange = document.getElementById('conicYRange');
+const conicYNum = document.getElementById('conicYNum');
+const previewspan = document.getElementById('previewspan');
+const globalBgRepeat = document.getElementById('globalBgRepeat');
+
+// 仅更新滑块位置和选中状态
+function updateStopThumbsPosition() {
+  const stops = layers[activeLayerIndex].stops;
+  const thumbs = stopTrack.querySelectorAll('.stop-drag-thumb');
+  thumbs.forEach((thumb, idx) => {
+    if (!stops[idx]) return;
+    thumb.style.left = stops[idx].pos + '%';
+    // 切换选中高亮
+    thumb.classList.toggle('active-thumb', idx === dragStopIdx);
+  });
+}
+
 // 按逗号分割字符串，忽略括号内部的逗号
 function splitByCommaIgnoreBrackets(str) {
     const result = [];
@@ -136,7 +160,6 @@ function loadPreset(fullBgStr){
             posVal = rule.replace(/^background-position:\s*/,'').trim();
         }
     }
-    // 只更新存储变量+输入框，删除window全局挂载
     bgSizeValue = sizeVal;
     bgPosValue = posVal;
     globalBgSizeInput.value = sizeVal;
@@ -151,8 +174,8 @@ function loadPreset(fullBgStr){
             radSize: 'farthest-corner',
             radX:50, radY:50,
             stops: [
-                {hex:'#4facfe', alpha:100, pos:0},
-                {hex:'#00f2fe', alpha:100, pos:100}
+                {hex:'#2600ff', alpha:100, pos:0},
+                {hex:'#fe0055', alpha:100, pos:100}
             ]
         }];
     }else{
@@ -176,10 +199,19 @@ function splitMultiGrad(str){
         if(c === '(') stack++;
         if(c === ')') stack--;
         const substr25 = s.slice(i, i + 25);
+        const substr24 = s.slice(i, i + 24); // 重复锥形长度
         const substr15 = s.slice(i, i + 15);
+        const substr14 = s.slice(i, i + 14); // 锥形长度
         if(
             stack === 0 && startIdx === -1 &&
-            (substr25 === 'repeating-linear-gradient' || substr25 === 'repeating-radial-gradient' || substr15 === 'linear-gradient' || substr15 === 'radial-gradient')
+            (
+                substr25 === 'repeating-linear-gradient' || 
+                substr25 === 'repeating-radial-gradient' || 
+                substr24 === 'repeating-conic-gradient' ||
+                substr15 === 'linear-gradient' || 
+                substr15 === 'radial-gradient' ||
+                substr14 === 'conic-gradient'
+            )
         ){
             startIdx = i;
         }
@@ -196,67 +228,71 @@ function splitMultiGrad(str){
     return result.map(g=>parseSingleGrad(g));
 }
 
+
 function parseSingleGrad(gStr) {
-    if (!gStr || typeof gStr !== 'string' || (!gStr.includes('linear-gradient') && !gStr.includes('radial-gradient'))) {
+    if (!gStr || typeof gStr !== 'string' || 
+        (!gStr.includes('linear-gradient') && !gStr.includes('radial-gradient') && !gStr.includes('conic-gradient'))) {
         return {
             type: 'linear',
             angle: 45,
             radShape: 'circle',
             radSize: 'farthest-corner',
             radX: 50, radY: 50,
-            stops: [{ hex: '#4facfe', alpha: 100, pos: 0 }, { hex: '#00f2fe', alpha: 100, pos: 100 }]
+            conicFromAngle: 0,
+            conicX: 50,
+            conicY: 50,
+            stops: [{ hex: '#2600ff', alpha: 100, pos: 0 }, { hex: '#fe0055', alpha: 100, pos: 100 }]
         };
     }
     const layer = {
         type: gStr.includes('repeating-radial') ? 'repeating-radial' :
             gStr.includes('repeating-linear') ? 'repeating-linear' :
-            gStr.includes('radial') ? 'radial' : 'linear',
+            gStr.includes('repeating-conic') ? 'repeating-conic' :
+            gStr.includes('radial') ? 'radial' :
+            gStr.includes('conic') ? 'conic' : 'linear',
         angle: 45,
         radShape: 'circle',
         radSize: 'farthest-corner',
         radX: 50, radY: 50,
+        conicFromAngle: 0,
+        conicX: 50,
+        conicY: 50,
         stops: []
     };
     const bracketMatch = gStr.match(/\((.+)\)/);
     if (!bracketMatch || !bracketMatch[1]) {
-        layer.stops = [{ hex: '#4facfe', alpha: 100, pos: 0 }, { hex: '#00f2fe', alpha: 100, pos: 100 }];
+        layer.stops = [{ hex: '#2600ff', alpha: 100, pos: 0 }, { hex: '#fe0055', alpha: 100, pos: 100 }];
         return layer;
     }
-
-    // 使用括号感知的逗号分割，替代直接split(',')
     const rawParts = splitByCommaIgnoreBrackets(bracketMatch[1]);
     let colorStartIdx = 0;
 
+    // 线性渐变解析
     if (layer.type === 'linear' || layer.type === 'repeating-linear') {
-        // 解析线性角度，兼容带空格的deg格式
         const degMatch = rawParts[0].match(/^\s*(\d+)\s*deg\s*$/);
         if (degMatch) {
             layer.angle = Number(degMatch[1]);
             colorStartIdx = 1;
         }
-    } else {
-        // 径向参数解析：从第一个配置项中提取shape、size、at位置
+    } 
+    // 径向渐变解析
+    else if (layer.type === 'radial' || layer.type === 'repeating-radial') {
         const firstItem = rawParts[0] || '';
         const shapeList = ['circle', 'ellipse'];
         const sizeList = ['closest-side', 'farthest-side', 'closest-corner', 'farthest-corner'];
-        
         let hasConfig = false;
         const configParts = firstItem.split(/\s+/).filter(Boolean);
         let ptr = 0;
-
-        // 匹配形状
         if (ptr < configParts.length && shapeList.includes(configParts[ptr])) {
             layer.radShape = configParts[ptr];
             ptr++;
             hasConfig = true;
         }
-        // 匹配尺寸
         if (ptr < configParts.length && sizeList.includes(configParts[ptr])) {
             layer.radSize = configParts[ptr];
             ptr++;
             hasConfig = true;
         }
-        // 匹配 at X% Y%
         if (ptr < configParts.length && configParts[ptr] === 'at') {
             ptr++;
             hasConfig = true;
@@ -271,32 +307,58 @@ function parseSingleGrad(gStr) {
                 ptr++;
             }
         }
-
+        colorStartIdx = hasConfig ? 1 : 0;
+    }
+    // 锥形渐变解析
+    else {
+        const firstItem = rawParts[0] || '';
+        let hasConfig = false;
+        const configParts = firstItem.split(/\s+/).filter(Boolean);
+        let ptr = 0;
+        // 解析 from 起始角度
+        if (ptr < configParts.length && configParts[ptr] === 'from') {
+            ptr++;
+            hasConfig = true;
+            if (ptr < configParts.length) {
+                const degVal = parseFloat(configParts[ptr].replace('deg', ''));
+                layer.conicFromAngle = isNaN(degVal) ? 0 : degVal;
+                ptr++;
+            }
+        }
+        // 解析 at 中心位置
+        if (ptr < configParts.length && configParts[ptr] === 'at') {
+            ptr++;
+            hasConfig = true;
+            if (ptr < configParts.length) {
+                const xVal = parseFloat(configParts[ptr].replace('%', ''));
+                layer.conicX = isNaN(xVal) ? 50 : xVal;
+                ptr++;
+            }
+            if (ptr < configParts.length) {
+                const yVal = parseFloat(configParts[ptr].replace('%', ''));
+                layer.conicY = isNaN(yVal) ? 50 : yVal;
+                ptr++;
+            }
+        }
         colorStartIdx = hasConfig ? 1 : 0;
     }
 
-    // 解析色标
+    // 色标解析
     const colorItems = rawParts.slice(colorStartIdx);
     for (const seg of colorItems) {
         let hex = '#ffffff', alpha = 100, pos = 50;
         let matched = false;
-
         if (seg === 'transparent') {
             hex = '#000000';
             alpha = 0;
             matched = true;
         }
-
-        // 兼容rgba及位置百分号
         const rgbaReg = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([0-9.]+)\s*\)\s*(\d+)%?\s*$/i;
         const rgbaRes = seg.match(rgbaReg);
-        // 兼容rgb及位置百分号
         const rgbReg = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*(\d+)%?\s*$/i;
         const rgbRes = seg.match(rgbReg);
-        // 兼容6位十六进制及位置百分号
         const hexReg = /#([0-9a-fA-F]{6})\s*(\d+)%?\s*$/;
         const hexRes = seg.match(hexReg);
-
         if (rgbaRes) {
             const r = Number(rgbaRes[1]), g = Number(rgbaRes[2]), b = Number(rgbaRes[3]);
             hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
@@ -314,18 +376,16 @@ function parseSingleGrad(gStr) {
             pos = hexRes[2] ? Number(hexRes[2]) : 50;
             matched = true;
         }
-
         if (matched) {
             layer.stops.push({ hex, alpha, pos });
         }
     }
-
-    // 兜底最少2个色标
     if (layer.stops.length < 2) {
-        layer.stops = [{ hex: '#4facfe', alpha: 100, pos: 0 }, { hex: '#00f2fe', alpha: 100, pos: 100 }];
+        layer.stops = [{ hex: '#2600ff', alpha: 100, pos: 0 }, { hex: '#fe0055', alpha: 100, pos: 100 }];
     }
     return layer;
 }
+
 // 渲染图层列表
 function renderLayerList(){
     layerList.innerHTML = '';
@@ -337,7 +397,14 @@ function renderLayerList(){
         item.draggable = true;
         item.innerHTML = `
                 <div class="layer-head">
-                    <span class="layer-name">图层${idx+1} ${ly.type === 'linear' ? '线性' : ly.type === 'repeating-linear' ? '重复线性' : ly.type === 'radial' ? '径向' : '重复径向'}</span>
+                    <span class="layer-name">图层${idx+1} ${
+                        ly.type === 'linear' ? '线性' : 
+                        ly.type === 'repeating-linear' ? '重复线性' : 
+                        ly.type === 'radial' ? '径向' : 
+                        ly.type === 'repeating-radial' ? '重复径向' :
+                        ly.type === 'conic' ? '锥形' :
+                        '重复锥形'
+                    }</span>
                     <button class="del-layer" data-idx="${idx}"><i class="ri-close-large-line"></i></button>
                 </div>
                 <p style="font-size:12px;">${ly.stops.length} 个色标 | 右键复制/粘贴</p>
@@ -438,13 +505,22 @@ function syncLayerToControl(){
     radXNum.value = ly.radX;
     radYRange.value = ly.radY;
     radYNum.value = ly.radY;
+    conicAngleRange.value = ly.conicFromAngle;
+    conicAngleNum.value = ly.conicFromAngle;
+    conicXRange.value = ly.conicX;
+    conicXNum.value = ly.conicX;
+    conicYRange.value = ly.conicY;
+    conicYNum.value = ly.conicY;
     toggleGradPanel();
 }
+
 function toggleGradPanel(){
     const t = gradType.value;
     linearConfig.style.display = (t === 'linear' || t === 'repeating-linear') ? 'block' : 'none';
     radialConfig.style.display = (t === 'radial' || t === 'repeating-radial') ? 'block' : 'none';
+    conicConfig.style.display = (t === 'conic' || t === 'repeating-conic') ? 'block' : 'none';
 }
+
 // 统一获取鼠标/触摸横坐标
 function getEventClientX(e) {
   if (e.touches && e.touches.length > 0) {
@@ -457,17 +533,15 @@ function getEventClientX(e) {
 function renderStopDragTrack() {
   stopTrack.innerHTML = '';
   const stops = layers[activeLayerIndex].stops;
-
   stops.forEach((st, idx) => {
     const thumb = document.createElement('div');
     thumb.className = 'stop-drag-thumb ' + (idx === dragStopIdx ? 'active-thumb' : '');
     thumb.dataset.sidx = idx;
     thumb.style.left = st.pos + '%';
-
     let dragging = false;
-    // 存储移除函数，拖拽结束销毁监听
     let unbindMove = null;
     let unbindEnd = null;
+    let unbindCancel = null;
 
     // 拖拽移动统一处理
     function handleMove(e) {
@@ -477,7 +551,7 @@ function renderStopDragTrack() {
       const x = getEventClientX(e) - rect.left;
       let pct = Math.max(0, Math.min(100, (x / rect.width) * 100));
       layers[activeLayerIndex].stops[idx].pos = Math.round(pct);
-      renderStopDragTrack();
+      updateStopThumbsPosition();
       renderStopList();
       updatePreview();
     }
@@ -487,8 +561,10 @@ function renderStopDragTrack() {
       dragging = false;
       if (unbindMove) unbindMove();
       if (unbindEnd) unbindEnd();
+      if (unbindCancel) unbindCancel();
       unbindMove = null;
       unbindEnd = null;
+      unbindCancel = null;
     }
 
     // 拖拽开始
@@ -496,16 +572,16 @@ function renderStopDragTrack() {
       e.preventDefault();
       dragging = true;
       dragStopIdx = idx;
-      renderStopDragTrack();
+      updateStopThumbsPosition();
       renderStopList();
-
-      // 绑定移动、结束监听，保存销毁函数
+      
       const moveFn = handleMove;
       const endFn = handleEnd;
       document.addEventListener('mousemove', moveFn, { passive: false });
       document.addEventListener('mouseup', endFn);
       document.addEventListener('touchmove', moveFn, { passive: false });
       document.addEventListener('touchend', endFn);
+      document.addEventListener('touchcancel', endFn);
 
       unbindMove = () => {
         document.removeEventListener('mousemove', moveFn);
@@ -515,28 +591,25 @@ function renderStopDragTrack() {
         document.removeEventListener('mouseup', endFn);
         document.removeEventListener('touchend', endFn);
       };
+      unbindCancel = () => {
+        document.removeEventListener('touchcancel', endFn);
+      };
     }
 
     // PC鼠标按下
     thumb.addEventListener('mousedown', handleStart, { passive: false });
     // 移动端触摸按下
     thumb.addEventListener('touchstart', handleStart, { passive: false });
-
-    // 右键菜单
+    // 右键菜单（均分色标）
     thumb.oncontextmenu = function (e) {
       e.preventDefault();
-      hideAllCtx();
-      dragStopIdx = idx;
-      renderStopDragTrack();
-      renderStopList();
-      stopCtx.style.left = e.clientX + 'px';
-      stopCtx.style.top = e.clientY + 'px';
-      stopCtx.style.display = 'block';
+      distributeStopsEvenly();
     };
 
     stopTrack.appendChild(thumb);
   });
 }
+
 // 渲染色标列表
 function renderStopList(){
     const ly = layers[activeLayerIndex];
@@ -627,6 +700,25 @@ function renderStopList(){
         }
     })
 }
+// 均分当前图层的所有色标位置
+function distributeStopsEvenly() {
+    const stops = layers[activeLayerIndex].stops;
+    const total = stops.length;
+    if (total < 2) return;
+
+    const startPos = stops[0].pos;
+    const endPos = stops[total - 1].pos;
+
+    for (let i = 0; i < total; i++) {
+        const ratio = i / (total - 1);
+        stops[i].pos = Math.round(startPos + (endPos - startPos) * ratio);
+    }
+    renderStopDragTrack();
+    renderStopList();
+    updatePreview();
+    showMessage('滑块已均分！', 'success');
+}
+
 // 色标右键菜单
 stopCtx.querySelectorAll('div[data-action]').forEach(el=>{
     el.onclick = function(){
@@ -653,7 +745,7 @@ stopCtx.querySelectorAll('div[data-action]').forEach(el=>{
         hideAllCtx();
     }
 })
-// 生成单层渐变CSS（完整还原径向参数）
+// 生成单层渐变CSS
 function buildSingleGradient(layer){
     const stopText = layer.stops.map(s=>`${hexToRgba(s.hex,s.alpha)} ${s.pos}%`).join(', ');
     if(layer.type === 'linear'){
@@ -662,16 +754,23 @@ function buildSingleGradient(layer){
         return `repeating-linear-gradient(${layer.angle}deg, ${stopText})`;
     }else if(layer.type === 'repeating-radial'){
         return `repeating-radial-gradient(${layer.radShape} ${layer.radSize} at ${layer.radX}% ${layer.radY}%, ${stopText})`;
-    }else{
+    }else if(layer.type === 'radial'){
         return `radial-gradient(${layer.radShape} ${layer.radSize} at ${layer.radX}% ${layer.radY}%, ${stopText})`;
+    }else if(layer.type === 'conic'){
+        return `conic-gradient(from ${layer.conicFromAngle}deg at ${layer.conicX}% ${layer.conicY}%, ${stopText})`;
+    }else{
+        return `repeating-conic-gradient(from ${layer.conicFromAngle}deg at ${layer.conicX}% ${layer.conicY}%, ${stopText})`;
     }
 }
+
 // 拼接完整背景
 function generateFullBackground(){
     const reversedLayers = [...layers].reverse();
     const allGrads = reversedLayers.map(l=>buildSingleGradient(l)).join(', ');
+    const mode = globalBgRepeat.value;
     let css = `background: ${allGrads};`;
-    // 全局尺寸、位置，统一一行，不按图层拆分
+
+    // 全局尺寸、位置
     const sizeTxt = bgSizeValue.trim();
     const posTxt = bgPosValue.trim();
     if(sizeTxt){
@@ -680,20 +779,43 @@ function generateFullBackground(){
     if(posTxt){
         css += `\nbackground-position: ${posTxt};`;
     }
+    if (mode === 'text') {
+        css += `\n-webkit-background-clip: text;`;
+        css += `\nbackground-clip: text;`;
+        css += `\n-webkit-text-fill-color: transparent;`;
+    }
     return css;
 }
+
 // 更新预览
 function updatePreview(){
     const fullCode = generateFullBackground();
     const gradOnly = fullCode.replace('background: ','').replace(/;[\s\S]*$/,'');
-    preview.style.background = '';
-    void preview.offsetWidth;
-    preview.style.background = gradOnly;
-    // 全局平铺样式同步到预览盒子
-    preview.style.backgroundSize = bgSizeValue || '';
-    preview.style.backgroundPosition = bgPosValue || '';
+    const mode = globalBgRepeat.value;
+
+    if (mode === 'box') {
+        // 盒子渐变模式
+        previewspan.style.display = 'none';
+        preview.style.background = '';
+        void preview.offsetWidth;
+        preview.style.background = gradOnly;
+        preview.style.backgroundSize = bgSizeValue || '';
+        preview.style.backgroundPosition = bgPosValue || '';
+    } else {
+        // 文字渐变模式
+        preview.style.background = 'transparent';
+        previewspan.style.display = 'block';
+        previewspan.style.background = gradOnly;
+        previewspan.style.backgroundSize = bgSizeValue || '';
+        previewspan.style.backgroundPosition = bgPosValue || '';
+        previewspan.style.webkitBackgroundClip = 'text';
+        previewspan.style.backgroundClip = 'text';
+        previewspan.style.webkitTextFillColor = 'transparent';
+    }
+
     cssCode.innerText = fullCode;
 }
+
 // 新增图层
 addLayerBtn.onclick = function(){
     layers.push({
@@ -702,6 +824,9 @@ addLayerBtn.onclick = function(){
         radShape:'circle',
         radSize:'farthest-corner',
         radX:50,radY:50,
+        conicFromAngle: 0,
+        conicX: 50,
+        conicY: 50,
         stops:[{hex:'#ffffff',alpha:0,pos:0},{hex:'#000000',alpha:30,pos:100}]
     });
     activeLayerIndex = layers.length - 1;
@@ -711,6 +836,7 @@ addLayerBtn.onclick = function(){
     renderStopList();
     updatePreview();
 }
+
 // 新增色标
 addStopBtn.onclick = function(){
     layers[activeLayerIndex].stops.push({hex:'#ffffff',alpha:100,pos:50});
@@ -778,6 +904,10 @@ gradType.onchange = function(){
     toggleGradPanel();
     updatePreview();
 }
+// 渐变显示模式切换
+globalBgRepeat.onchange = function(){
+    updatePreview();
+}
 // 全局background-size输入监听
 globalBgSizeInput.oninput = function(){
     bgSizeValue = this.value.trim();
@@ -788,6 +918,46 @@ globalBgPosInput.oninput = function(){
     bgPosValue = this.value.trim();
     updatePreview();
 }
+// 锥形起始角度双向同步
+conicAngleRange.oninput = function(){
+    conicAngleNum.value = this.value;
+    layers[activeLayerIndex].conicFromAngle = Number(this.value);
+    updatePreview();
+}
+conicAngleNum.oninput = function(){
+    let val = Math.max(0, Math.min(360, Number(this.value)));
+    this.value = val;
+    conicAngleRange.value = val;
+    layers[activeLayerIndex].conicFromAngle = val;
+    updatePreview();
+}
+// 锥形中心X双向同步
+conicXRange.oninput = function(){
+    conicXNum.value = this.value;
+    layers[activeLayerIndex].conicX = Number(this.value);
+    updatePreview();
+}
+conicXNum.oninput = function(){
+    let val = Math.max(0, Math.min(100, Number(this.value)));
+    this.value = val;
+    conicXRange.value = val;
+    layers[activeLayerIndex].conicX = val;
+    updatePreview();
+}
+// 锥形中心Y双向同步
+conicYRange.oninput = function(){
+    conicYNum.value = this.value;
+    layers[activeLayerIndex].conicY = Number(this.value);
+    updatePreview();
+}
+conicYNum.oninput = function(){
+    let val = Math.max(0, Math.min(100, Number(this.value)));
+    this.value = val;
+    conicYRange.value = val;
+    layers[activeLayerIndex].conicY = val;
+    updatePreview();
+}
+
 // 初始化
 renderPresets();
 renderLayerList();
@@ -796,3 +966,72 @@ renderStopDragTrack();
 renderStopList();
 toggleGradPanel();
 updatePreview();
+
+//移动端可拖动预览区位置
+let isDrag = false;
+let offsetX = 0;
+let offsetY = 0;
+// 缓存DOM
+const previewWrapdom = document.querySelector('.preview-wrap');
+// 抽离touchstart处理函数
+function handleTouchStart(e) {
+  isDrag = true;
+  previewWrapdom.style.zIndex = 1;
+  const touch = e.touches[0];
+  offsetX = touch.clientX - previewWrapdom.offsetLeft;
+  offsetY = touch.clientY - previewWrapdom.offsetTop;
+  // 仅自身拖拽时阻止滚动，不影响其他元素触摸
+  e.preventDefault();
+}
+// 抽离touchmove处理函数
+function handleTouchMove(e) {
+  if (!isDrag) return;
+  const touch = e.touches[0];
+  const x = touch.clientX - offsetX;
+  const y = touch.clientY - offsetY;
+  previewWrapdom.style.left = x + 'px';
+  previewWrapdom.style.top = y + 'px';
+  // 关键：仅拖拽预览框时阻止，不加全局强制阻断
+  e.preventDefault();
+}
+// 抽离touchend处理函数
+function handleTouchEnd() {
+  isDrag = false;
+  previewWrapdom.style.zIndex = 1;
+}
+// 绑定拖拽事件
+function bindTouchDrag() {
+  previewWrapdom.addEventListener('touchstart', handleTouchStart, { passive: false });
+}
+// 解绑拖拽事件
+function unbindTouchDrag() {
+  previewWrapdom.removeEventListener('touchstart', handleTouchStart);
+  previewWrapdom.style.zIndex = '';
+  previewWrapdom.style.left = '';
+  previewWrapdom.style.top = '';
+}
+previewWrapdom.addEventListener('touchstart', function(){
+  function tempMove(e){
+    if(!isDrag) return;
+    handleTouchMove(e);
+  }
+  function tempEnd(){
+    handleTouchEnd();
+    document.removeEventListener('touchmove', tempMove);
+    document.removeEventListener('touchend', tempEnd);
+  }
+  document.addEventListener('touchmove', tempMove, {passive:false});
+  document.addEventListener('touchend', tempEnd);
+});
+// 判断宽度并执行绑定逻辑
+function checkScreenWidth() {
+  if (window.innerWidth < 921) {
+    bindTouchDrag();
+  } else {
+    unbindTouchDrag();
+  }
+}
+// 页面初始化执行一次
+checkScreenWidth();
+// 窗口大小变化时重新判断
+window.addEventListener('resize', checkScreenWidth);

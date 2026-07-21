@@ -1,4 +1,4 @@
-const isdark = 'dark';//默认主题,light为浅色，dark为深色
+const isdark = 'dark';//默认主题,light为浅色模式，dark为深色模式
 function applyTheme() {
   try {
     const theme = localStorage.getItem('theme') || isdark;
@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 });
 
-// 兼容浏览器bfcache（后退/前进页面缓存）
 window.addEventListener('pageshow', function (e) {
   if (e.persisted) {
     applyTheme();
