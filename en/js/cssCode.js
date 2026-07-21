@@ -810,7 +810,8 @@ function renderStopList(){
                 <span>%</span>
             </div>
         `;
-        item.onclick = function(){
+        item.onclick = function(e){
+            if (e.target.closest('input') || e.target.closest('button')) return;
             dragStopIdx = idx;
             renderStopDragTrack();
             renderStopList();
@@ -870,6 +871,14 @@ function renderStopList(){
         stopList.appendChild(item);
     })
     document.querySelectorAll('input[type="color"]').forEach(inp=>{
+        inp.addEventListener('click', function(e){
+            e.stopPropagation();
+        });
+        inp.addEventListener('touchstart', function(e){
+            e.stopPropagation();
+            this.focus();
+        }, {passive: true});
+    
         inp.oninput = function(){
             const sidx = Number(this.dataset.sidx);
             layers[activeLayerIndex].stops[sidx].hex = this.value;
