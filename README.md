@@ -1,91 +1,100 @@
-## ✨ About
+## ✨ Project Introduction
 
-CSS Gradient Generator is a **zero-dependency, fully static** visual CSS gradient generation tool that helps frontend developers and designers quickly create beautiful gradient background effects. No installation required — just open it in your browser, preview effects in real-time, and copy production-ready CSS code with one click.
+CSS Gradient Generator is a **zero-dependency, pure static** CSS gradient visualization tool that helps front-end developers and designers quickly create beautiful gradient background effects. No software installation required — simply open it in your browser, preview effects in real time, and copy ready-to-use CSS code with one click.
 
-The tool supports professional features including multi-layer stacking, multiple gradient types, draggable color stop adjustment, opacity control, and background tiling configuration. It comes with 30+ carefully crafted gradient presets, making it easy to create professional-grade gradient effects.
+The tool supports multi-layer stacking, multiple gradient types, color stop drag-and-drop adjustment, opacity control, background tiling configuration, and other professional features. With 30+ built-in curated gradient presets, you can easily create professional-grade gradient effects.
 
 ## 🚀 Live Demo
 
-👉 Chinese: **[Try it now](https://2925112454.github.io/CSS-Gradient-Generator/zh/)**
-👉 English: **[Try it now](https://2925112454.github.io/CSS-Gradient-Generator/en/)**
+👉 Chinese: **[Click to Experience](https://2925112454.github.io/CSS-Gradient-Generator/zh/)**
+👉 English: **[Click to Experience](https://2925112454.github.io/CSS-Gradient-Generator/en/)**
 
-> 💡 Note: The tool runs entirely locally in your browser. No data is uploaded, protecting your privacy.
+> 💡 Note: The tool runs entirely locally in your browser — no data is uploaded, protecting your privacy and security.
 
 ## 🎯 Features
 
 ### Core Features
-- ✅ **Six gradient types**: Linear gradient, repeating linear gradient, radial gradient, repeating radial gradient, conic gradient, repeating conic gradient
-- ✅ **Multi-layer system**: Support for unlimited layer stacking, drag-and-drop reordering, right-click copy/paste/delete
-- ✅ **Color stop management**: Visual drag-and-drop adjustment of color stop positions, with color picker and opacity controls
-- ✅ **Real-time preview**: All changes take effect instantly — what you see is what you get
-- ✅ **One-click copy**: Click the preview area or button to copy complete CSS code
-- ✅ **Curated presets**: 30+ beautiful built-in gradient presets, apply with one click
-- ✅ **Tiling configuration**: Custom `background-size` and `background-position` support for easily creating checkerboards, stripes, and other patterns
-- ✅ **Text gradient**: Freely switch between box gradient mode and text gradient mode (`background-clip: text;`)
+
+- ✅ **Six Gradient Types**: Linear gradient, repeating linear gradient, radial gradient, repeating radial gradient, conic gradient, repeating conic gradient
+- ✅ **Multi-Layer System**: Supports unlimited layer stacking, drag-and-drop reordering, right-click copy/paste/delete
+- ✅ **Color Stop Management**: Visually drag to adjust color stop positions, with color picker and opacity adjustment
+- ✅ **Real-Time Preview**: All adjustments take effect instantly — what you see is what you get
+- ✅ **One-Click Copy**: Click the preview area or button to copy the complete CSS code
+- ✅ **Curated Presets**: 30+ built-in beautiful gradient presets, apply with one click
+- ✅ **Tiling Configuration**: Customize `background-size` and `background-position` to easily create checkerboard patterns, stripes, and more
+- ✅ **Text Gradient**: Freely switch between box gradient mode and text gradient mode (`background-clip: text;`)
+- ✅ **Preset Extension**: Dedicated CSS gradient preset page with customizable preset library, one-click CSS code copying, and seamless switching to the editor for secondary editing
 
 ### Experience Optimizations
-- 🌓 **Light/Dark themes**: Toggle between dark and light mode, with automatic preference saving
-- 📱 **Responsive design**: Perfectly adapts to desktop and mobile, with full touch support
-- 🖱️ **Context menus**: Right-click shortcuts for layers and color stops
-- 💾 **Local storage**: Theme settings are automatically saved locally
-- ⚡ **Zero dependencies**: Built with vanilla HTML/CSS/JavaScript, no framework dependencies
-- 🌍 **Bilingual support**: Available in both Chinese and English
+
+- 🌓 **Light/Dark Theme**: Supports dark/light mode switching with automatic preference memory
+- 📱 **Responsive Design**: Perfectly adapts to desktop and mobile devices, with touch support
+- 🖱️ **Right-Click Menu**: Quick right-click operations for layers and color stops
+- 💾 **Local Storage**: Theme settings are automatically saved locally
+- ⚡ **Zero Dependencies**: Written in pure native HTML/CSS/JavaScript, no framework dependencies
+- 🌍 **Bilingual Support**: Available in both Chinese and English versions
 
 ## 📖 Usage Guide
 
 ### Basic Workflow
-1. **Select gradient type**: Choose your desired gradient type (linear/radial/conic/repeating) from the control panel on the right
-2. **Adjust gradient parameters**:
-   - Linear gradient: Adjust the gradient angle (0°-360°)
-   - Radial gradient: Set shape (circle/ellipse), size, and center point position
-   - Conic gradient: Adjust starting angle (0°-360°) and center point position
-3. **Manage color stops**:
-   - Click "Add Color Stop" to add new color nodes
-   - Drag color stop thumbs on the track to adjust positions
-   - Click the color picker to change colors
+
+1. **Select Gradient Type**: Choose your desired gradient type in the right control panel (linear/radial/conic/repeating)
+2. **Adjust Gradient Parameters**:
+   - Linear gradient: Adjust gradient angle (0°–360°)
+   - Radial gradient: Set shape (circle/ellipse), size, and center position
+   - Conic gradient: Adjust starting angle (0°–360°) and center position
+3. **Manage Color Stops**:
+   - Click "Add Color Stop" to add color nodes
+   - Drag color stop sliders on the track to adjust positions
+   - Click the color picker to modify colors
    - Drag the opacity slider to adjust color transparency
-4. **Multi-layer stacking**: Click "Add Layer" to add more gradient layers, drag to adjust layer order
-5. **Apply presets**: Click any gradient in the preset panel on the left to apply beautiful effects instantly
-6. **Configure tiling**: For repeating patterns, fill in background tile size and position
-7. **Copy code**: Click the "Copy CSS Code" button or directly click the preview area to copy the generated CSS code
+4. **Multi-Layer Stacking**: Click "Add Layer" to add more gradient layers, drag to adjust layer order
+5. **Apply Presets**: Click any gradient in the left preset area to apply beautiful effects instantly
+6. **Configure Tiling**: Fill in background tiling size and position for repeating patterns
+7. **Copy Code**: Click the "Copy CSS Code" button or directly click the preview area to copy the generated CSS code
 
-### Right-click Shortcuts
-- **Layer right-click**: Copy layer, paste layer, delete layer
-- **Layer drag**: Adjust layer order
-- **Color stop right-click**: Copy color stop, paste color stop, delete color stop
-- **Mobile**: Long press layers to drag and reorder; all right-click operations available on PC are implemented via double-tap on mobile
+### Right-Click Shortcuts
 
-### Shortcuts
-- Click preview area on PC: Quickly copy CSS code
-- Click and drag preview area on mobile: Move the preview box to adjust its position
+- **Layer Right-Click**: Copy layer, paste layer, delete layer
+- **Layer Drag**: Adjust layer order
+- **Color Stop Right-Click**: Copy color stop, paste color stop, delete color stop
+- **Mobile**: Long-press layers to drag and reorder; all right-click operations are replaced with double-click
+
+### Keyboard Shortcuts
+
+- PC: Click the preview area to quickly copy CSS code
+- Mobile: Click and drag the preview box to adjust its position
 
 ## 🔧 Feature Details
 
-### Gradient Type Reference
+### Gradient Types
 
 | Type | Description | Use Cases |
 |------|-------------|-----------|
-| Linear gradient `linear-gradient` | Colors transition along a straight line | Most regular backgrounds, button gradients |
-| Repeating linear `repeating-linear-gradient` | Linear gradient tiled repeatedly | Stripe patterns, progress bars, textured backgrounds |
-| Radial gradient `radial-gradient` | Colors radiate outward from a center point | Spotlight effects, circular glows, spheres |
-| Repeating radial `repeating-radial-gradient` | Radial gradient tiled repeatedly | Concentric circle patterns, ripple effects, bullseyes |
-| Conic gradient `conic-gradient` | Colors rotate clockwise around a center | Pie charts, cones, spheres |
-| Repeating conic `repeating-conic-gradient` | Conic gradient tiled repeatedly | Starburst patterns, checkerboards, circular designs |
+| Linear Gradient `linear-gradient` | Colors transition along a straight line | Most common backgrounds, button gradients |
+| Repeating Linear `repeating-linear-gradient` | Repeating tiled linear gradient | Stripe patterns, progress bars, textured backgrounds |
+| Radial Gradient `radial-gradient` | Colors radiate outward from a center point | Spotlight effects, circular glows, spheres |
+| Repeating Radial `repeating-radial-gradient` | Repeating tiled radial gradient | Concentric circle patterns, ripple effects, bullseye |
+| Conic Gradient `conic-gradient` | Colors rotate clockwise around a point | Pie charts, cones, spheres |
+| Repeating Conic `repeating-conic-gradient` | Repeating tiled conic gradient | Concentric circle patterns, ripple effects, bullseye |
 
 ### Radial Gradient Parameters
-- **Shape**: `circle` (perfect circle) / `ellipse` (oval)
+
+- **Shape**: `circle` / `ellipse`
 - **Size**:
-  - `closest-side`: Radius extends to the closest edge from the center
-  - `farthest-side`: Radius extends to the farthest edge from the center
-  - `closest-corner`: Radius extends to the closest corner from the center
-  - `farthest-corner`: Default, radius extends to the farthest corner from the center
-- **Center point**: Adjust gradient center position via X% and Y%
+  - `closest-side`: Gradient radius reaches the nearest side from the center
+  - `farthest-side`: Gradient radius reaches the farthest side from the center
+  - `closest-corner`: Gradient radius reaches the nearest corner from the center
+  - `farthest-corner`: Default value — gradient radius reaches the farthest corner from the center
+- **Center Point**: Adjust gradient center position via X% and Y%
 
 ### Conic Gradient Parameters
-- **Starting angle**: 0°-360°
-- **Center point**: Adjust gradient center position via X% and Y%
+
+- **Starting Angle**: 0°–360°
+- **Center Point**: Adjust gradient center position via X% and Y%
 
 ### Generated CSS Code Examples
+
 ```css
 /* Simple linear gradient */
 background: linear-gradient(45deg, rgba(79,172,254,1) 0%, rgba(0,242,254,1) 100%);
@@ -101,41 +110,55 @@ background-size: 20px 20px;
 background-position: 0 0, 10px 10px;
 ```
 
+### Preset Extension Page
+
+- **Features**:
+  - One-click copy of preset CSS code
+  - One-click edit button for seamless switching to the editor for secondary editing
+  - Support for setting categories and preset names
+  - Filter by configured categories
+
 ## 📁 Project Structure
 
 ```
 ../
-├── zh/                     # Chinese version
-│   ├── index.html          # Main page
+├── zh/                          # Chinese version
+│   ├── index.html               # Main page (gradient editor)
+│   ├── color.html               # Preset extension page
 │   ├── css/
-│   │   ├── style.css       # Main stylesheet
-│   │   ├── remixicon.css   # Icon library styles
-│   │   └── remixicon.woff2 # Icon font
+│   │   ├── style.css            # Main stylesheet
+│   │   ├── remixicon.css        # Icon library styles
+│   │   └── remixicon.woff2      # Icon font
 │   └── js/
-│       ├── color.js        # Gradient preset data
-│       ├── cssCode.js      # Core logic: gradient generation, interaction handling
-│       ├── light.js        # Theme toggle (light/dark mode)
-│       └── message.js      # Toast notification component
-├── en/                     # English version (same structure as Chinese)
+│       ├── color.js             # Gradient preset data for main page
+│       ├── colors.js            # Core logic: preset extension page copying, seamless switching to editor
+│       ├── loadGradientData.js  # Gradient preset data for preset extension page
+│       ├── cssCode.js           # Core logic: gradient generation, interaction handling
+│       ├── light.js             # Theme switching (dark/light mode)
+│       └── message.js           # Message toast component
+├── en/                          # English version (same structure as Chinese)
 │   ├── index.html
 │   ├── css/
 │   └── js/
-└── README.md               # Project documentation
+├── index.html                   # Temporary language redirect page (for Github Pages, can be removed)
+├── README.zh-CN.md              # Project documentation (Chinese)
+└── README.md                    # Project documentation (English)
 ```
 
 ## 🛠️ Tech Stack
 
-- **HTML5**: Semantic markup
-- **CSS3**: CSS variables, Flexbox, Grid, transitions and animations
-- **Vanilla JavaScript (ES6+)**: No framework dependencies
-- **Remix Icon**: Open source icon library (bundled locally)
+- **HTML5**: Semantic tags
+- **CSS3**: CSS variables, Flexbox, Grid, transition animations
+- **Native JavaScript (ES6+)**: No framework dependencies
+- **Remix Icon**: Open-source icon library (bundled locally)
 
-### Code Features
-- Pure vanilla implementation, no build tools required — refresh to see changes after editing source
-- Modular design, each JS file has a single responsibility
-- Smart parenthesis parsing for correctly importing complex multi-layer gradients
-- Compatible with both mouse and touch events, mobile-friendly
-- Local storage for theme preferences with private mode fallback
+### Code Highlights
+
+- Pure native implementation — no build tools required, modify source and refresh to see changes
+- Modular design — each JS file has a single responsibility
+- Smart bracket parsing for correct handling of complex multi-layer gradient imports
+- Compatible with mouse and touch events, mobile-friendly
+- Local storage for theme settings, with private mode fallback
 
 ## 🌐 Browser Compatibility
 
@@ -145,45 +168,50 @@ background-position: 0 0, 10px 10px;
 | Firefox | ✅ 55+ |
 | Safari | ✅ 12+ |
 | Edge | ✅ 79+ |
-| Mobile browsers | ✅ iOS 12+, Android 8+ |
+| Mobile Browsers | ✅ iOS 12+, Android 8+ |
 
-> 💡 Note: This tool uses modern CSS and JS features and does not support Internet Explorer.
+> 💡 Note: The tool uses modern CSS and JS features and does not support Internet Explorer.
 
-### Contribution Opportunities
+### How to Contribute
+
 - 🎨 Add more beautiful gradient presets
 - 🌍 Translations for other languages
-- 🐛 Bug fixes and compatibility improvements
-- ✨ New features (e.g., gradient export as image, CSS minification, more color format support)
-- 📝 Documentation improvements
+- 🐛 Fix bugs and compatibility issues
+- ✨ Add new features (e.g., export gradient as image, CSS code minification, more color format support)
+- 📝 Improve documentation
 
 ## 📋 Changelog
 
-### v1.1.0 (2026-7-21)
+### v2.0.0 (2026-07-23)
+- ✅ Added dedicated preset page `color.html` to support more presets, with seamless switching to the editor for secondary editing and one-click preset code copying (presets on the extension page and editor page are independent of each other)
+
+### v1.1.0 (2026-07-21)
 - ✅ Expanded to six gradient types, added conic gradient and repeating conic gradient
 - ✅ Added more presets
 - ✅ Added text gradient support (free switching between box gradient and text gradient modes)
-- ✅ Fixed known bugs
+- ✅ Fixed several known bugs
 
-### v1.0.0 (2026-7-20)
+### v1.0.0 (2026-07-20)
 - 🎉 Initial release
-- ✅ Support for four gradient types
+- ✅ Supports four gradient types
 - ✅ Multi-layer stacking and drag-and-drop reordering
-- ✅ Visual drag-and-drop color stop adjustment
+- ✅ Visual color stop drag-and-drop adjustment
 - ✅ 30+ built-in gradient presets
 - ✅ Background tiling configuration
-- ✅ Light/dark theme toggle
+- ✅ Light/dark theme switching
 - ✅ Chinese/English bilingual support
-- ✅ Right-click context menus
+- ✅ Right-click context menu
 - ✅ Mobile touch adaptation
 
 ## 📄 License
 
-This project is open source under GPLv3. You may freely use it for personal and commercial projects, as long as you retain the copyright notice.
+This project is open-source under GPL 3.0. It can be freely used in personal and commercial projects, provided that the copyright notice is retained.
 
-## 🙏 Acknowledgements
+## 🙏 Acknowledgments
 
-- [Remix Icon](https://remixicon.com/) - For providing beautiful open source icons
-- Thanks to all contributors and users for your support
+- [Remix Icon](https://remixicon.com/) — Beautiful open-source icons
+- All contributors and users for their support
+
 ---
 
-If this tool helps you, please consider giving it a ⭐️ Star to show your support!
+If this tool has been helpful to you, please give it a ⭐️ Star to show your support!

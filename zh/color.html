@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>CSS渐变预设仓库 - CSS远不止如此|破瓶子PHP提供</title>
+<script>
+(function(){
+  try {
+    const saveTheme = localStorage.getItem('theme');
+    const root = document.documentElement;
+    if(saveTheme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }catch(e){
+    document.documentElement.classList.remove('dark');
+  }
+})();
+</script>
+<link rel="stylesheet" href="css/remixicon.css"/>
+<link href="css/style.css" rel="stylesheet" />
+<script src="js/color.js"></script>
+<script src="js/light.js"></script>
+</head>
+<body>
+<div class="message">
+    <div class="message_content">
+        <div class="message_text"></div>
+        <div class="message_close"><i class="ri-close-line"></i></div>
+    </div>
+</div>
+<script src="js/message.js"></script>
+<div class="container">
+  <div class="h1">
+      <h1>CSS渐变预设仓库</h1>
+      <button class="darkbut"><i class="ri-moon-line"></i><span class="msgtitle">切换主题</span></button>
+  </div>
+  <div class="main-wrap" style="flex-direction: column;">
+    <div class="preview-box-wrap">
+      <!-- 预览框 -->
+    </div>
+  </div>
+</div>
+<script src="js/loadGradientData.js"></script>
+<script src="js/colors.js"></script>
+</body>
+</html>

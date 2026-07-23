@@ -1,4 +1,4 @@
-// CSS渐变预设
+// CSS Gradient Presets index.html
 const presets = [
     { grad: 'background: radial-gradient(circle farthest-corner at 0% 0%, rgba(255,0,200,0.4) 0%, rgba(0,0,0,0) 44%), linear-gradient(182deg, rgba(0,7,102,1) 0%, rgba(0,0,0,1) 100%);' },
     { grad: 'background: radial-gradient(circle farthest-side at 100% 100%, rgba(255,187,0,0.7) 0%, rgba(0,0,0,0) 37%), radial-gradient(circle farthest-side at 0% 0%, rgba(255,0,187,0.5) 3%, rgba(0,0,0,0) 30%, rgba(255,255,255,0.5) 40%, rgba(0,0,0,0) 50%), linear-gradient(360deg, rgba(79,172,254,1) 0%, rgba(0,255,238,1) 36%, rgba(255,255,255,1) 100%);' },

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>CSS Gradient Tool - CSS Goes Beyond Basics | Powered by Popingzi PHP</title>
+<title>CSS Gradient Tool - CSS Goes Far Beyond This | Provided by Popingzi PHP</title>
 <script>
 (function(){
   try {
@@ -71,17 +71,18 @@
 <div class="preset-wrap">
     <div class="group-title">Gradient Presets</div>
     <div class="preset-grid" id="presetBox"></div>
+    <a href="color.html" target="_blank"><div class="colorhtml">More Presets</div></a>
 </div>
 </div>
 
-<!-- Right Control Panel Only -->
+<!-- Right Side Control Panel Only -->
  
 <div class="control-panel">
 <div class="group-title">Gradient Layers</div>
 <div class="layer-list" id="layerList"></div>
 <button class="btn btn-add-layer" id="addLayerBtn"><i class="ri-stack-line"></i> Add Layer</button>
 
-<div class="group-title">Current Layer Settings</div>
+<div class="group-title">Current Layer Configuration</div>
 <div class="row">
 <label>Gradient Type</label>
 <select id="gradType">
@@ -120,12 +121,12 @@
 </select>
 </div>
 <div class="row">
-<label>Center X %</label>
+<label>Center X%</label>
 <input type="range" id="radXRange" min="0" max="100" value="50">
 <input type="number" id="radXNum" min="0" max="100" value="50">
 </div>
 <div class="row">
-<label>Center Y %</label>
+<label>Center Y%</label>
 <input type="range" id="radYRange" min="0" max="100" value="50">
 <input type="number" id="radYNum" min="0" max="100" value="50">
 </div>
@@ -134,24 +135,24 @@
 <!-- Conic Gradient Configuration Panel -->
 <div id="conicConfig" style="display: none;">
   <div class="row">
-    <label>Start Angle</label>
+    <label>Starting Angle</label>
     <input type="range" id="conicAngleRange" min="0" max="360" value="0">
     <input type="number" id="conicAngleNum" min="0" max="360" value="0">
   </div>
   <div class="row">
-    <label>Center X %</label>
+    <label>Center X%</label>
     <input type="range" id="conicXRange" min="0" max="100" value="50">
     <input type="number" id="conicXNum" min="0" max="100" value="50">
   </div>
   <div class="row">
-    <label>Center Y %</label>
+    <label>Center Y%</label>
     <input type="range" id="conicYRange" min="0" max="100" value="50">
     <input type="number" id="conicYNum" min="0" max="100" value="50">
   </div>
 </div>
 
 
-<div class="group-title">Color Stops <span>(Drag sliders to adjust position; right-click to distribute sliders evenly.)</span></div>
+<div class="group-title">Color Stops<span> (Drag sliders to adjust position; right-click to evenly distribute sliders.)</span></div>
 <div class="stop-drag-track" id="stopTrack"></div>
 <div class="color-stop-list" id="stopList"></div>
 <button class="btn btn-add-stop" id="addStopBtn"><i class="ri-add-large-line"></i> Add Color Stop</button>
@@ -160,13 +161,13 @@
 </div>
 <!-- Context Menu -->
 <div class="context-menu" id="layerCtx">
-    <div data-action="copy">Duplicate Layer</div>
+    <div data-action="copy">Copy Layer</div>
     <div data-action="paste">Paste Layer</div>
     <div class="sep"></div>
     <div data-action="del">Delete Layer</div>
 </div>
 <div class="context-menu" id="stopCtx">
-    <div data-action="copy">Duplicate Color Stop</div>
+    <div data-action="copy">Copy Color Stop</div>
     <div data-action="paste">Paste Color Stop</div>
     <div class="sep"></div>
     <div data-action="del">Delete Color Stop</div>

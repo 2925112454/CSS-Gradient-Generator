@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
   /* Toast Component */
   /**
-   * DOM element shake warning animation
-   * @param {HTMLElement} el DOM element to shake
-   * @param {number} duration Shake duration in ms, default 600
+   * Shake warning animation for DOM elements
+   * @param {HTMLElement} el - DOM element to apply shake animation
+   * @param {number} [duration=600] - Shake duration in milliseconds
    */
   function shakeDom(el, duration = 600) {
     if (!el || !(el instanceof HTMLElement)) return;
@@ -17,12 +17,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }, duration);
   }
   /**
-   * Toast message
-   * @param {string} text Message content
-   * @param {string} type Message type: info / warning / error / success
-   * @param {HTMLElement|null} targetDom DOM element to shake (optional)
-   * @param {number} delay Auto-close delay in ms, 0 = no auto-close (optional)
-   * Usage: showMessage('Message text', 'info', document.querySelector('.search-input'), 2500);
+   * Message toast
+   * @param {string} text - Toast content
+   * @param {string} [type='info'] - Message type: info / warning / error / success
+   * @param {HTMLElement|null} [targetDom=null] - DOM element to shake along with the toast (optional)
+   * @param {number} [delay=2500] - Auto-close delay in milliseconds; 0 = no auto-close (optional)
+   * Usage: showMessage('Toast text', 'info', document.querySelector('.search-input'), 2500);
    */
   function showMessage(text, type = 'info', targetDom = null , delay = 2500) {
     const messageWrap = document.querySelector('.message');
@@ -30,25 +30,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const messageText = document.querySelector('.message_text');
     const closeBtn = document.querySelector('.message_close');
     if (!messageWrap || !messageContent || !messageText || !closeBtn) return;
-    // Message type icon config
+    // Icon mapping for each message type
     const iconMap = {
       info: '<i class="ri-error-warning-fill"></i>',
       warning: '<i class="ri-alert-fill"></i>',
       error: '<i class="ri-error-warning-fill"></i>',
       success: '<i class="ri-check-line"></i>'
     };
-    // Clear status classes
+    // Clear all status class names
     messageWrap.classList.remove('message_info','message_warning','message_error','message_success','message-leave');
     messageWrap.classList.add(`message_${type}`);
-    // 1. Remove old icon first (prevents duplicate icons)
+    // 1. Remove old icon first to prevent duplicate icons
     const oldIcon = messageContent.querySelector('.message_icon');
     if(oldIcon) oldIcon.remove();
-    // 2. Create icon container, insert before text
+    // 2. Create icon container and insert before text
     const iconEl = document.createElement('div');
     iconEl.className = 'message_icon';
     iconEl.innerHTML = iconMap[type];
     messageContent.insertBefore(iconEl, messageText);
-    // 3. Set message text
+    // 3. Set toast text
     messageText.textContent = text;
     // Enter animation
     messageWrap.classList.add('message-enter');
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
       shakeDom(targetDom);
     }
   }
-  // Mount global methods
+  // Expose methods globally
   window.showMessage = showMessage;
   window.shakeDom = shakeDom;
 });

@@ -1217,6 +1217,41 @@ renderStopDragTrack();
 renderStopList();
 toggleGradPanel();
 updatePreview();
+
+// ========== 跨标签编辑兼容逻辑 ==========
+window.loadPreset = loadPreset;// 暴露全局方法，供 color.html 直接调用
+// 从 localStorage 加载预设
+function checkAndLoadPreset() {
+    const preset = localStorage.getItem('gradient_edit_preset');
+    if (preset) {
+        loadPreset(preset);
+    }
+}
+// 监听 postMessage，color.html 直接发数据过来
+window.addEventListener('message', function(e) {
+    // 校验来源，确保安全
+    if (e.origin !== location.origin) return;
+    if (e.data && e.data.type === 'load-gradient' && e.data.data) {
+        loadPreset(e.data.data);
+    }
+});
+// 页面首次打开时加载
+checkAndLoadPreset();
+window.addEventListener('storage', function(e) {
+    if (e.key === 'gradient_edit_version' && e.newValue) {
+        const preset = localStorage.getItem('gradient_edit_preset');
+        if (preset) {
+            loadPreset(preset);
+        }
+    }
+});
+window.addEventListener('focus', checkAndLoadPreset);
+window.addEventListener('blur', function() {
+    localStorage.removeItem('gradient_edit_preset');
+    localStorage.removeItem('gradient_edit_version');
+});
+
+
 //移动端可拖动预览区位置
 let isDrag = false;
 let offsetX = 0;

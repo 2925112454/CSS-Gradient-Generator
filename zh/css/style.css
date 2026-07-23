@@ -36,6 +36,10 @@ html.dark{
     --message-warning-bg-color: #ff4800;/* 警告warning背景颜色 */
     --message-error-bg-color: #e60000;/* 警告error背景颜色 */
     --message-success-bg-color: #009b08;/* 警告success背景颜色 */
+    --button-text-color: #ffffff;/* 按钮文字颜色 */
+    --button-bg-color: #12141d;/* 按钮背景颜色 */
+    --button-text-hover-color: #ffffff;/* 按钮文字鼠标悬停颜色 */
+    --button-hover-bg-color: #2962ff;/* 按钮鼠标悬停背景颜色 */
 }
 :root{
     --bg-color: #e9e9e9;
@@ -75,6 +79,10 @@ html.dark{
     --message-warning-bg-color: #ff4800;
     --message-error-bg-color: #e60000;
     --message-success-bg-color: #009b08;
+    --button-text-color: #ffffff;
+    --button-bg-color: #9d9d9d;
+    --button-text-hover-color: #ffffff;
+    --button-hover-bg-color: #2962ff;
 }
 
 *{
@@ -87,6 +95,10 @@ html.dark{
     -moz-user-select: none;
     -ms-user-select: none;
     -o-user-select: none;
+}
+a{
+    text-decoration: none;
+    cursor: pointer;
 }
 input,textarea,select{
     user-select: text;
@@ -114,6 +126,7 @@ body {
     border-radius: 20px;
     display: flex;
     align-items: center;
+    box-shadow: var(--box-shadow);
 }
 h1{
     color: var(--h1-color);
@@ -141,7 +154,11 @@ h1{
     touch-action: none;
     user-select: none;
 }
-
+@media(max-width:1024px) {
+    .color_gradient-card {
+        width:calc((100% - 3 * 25px) / 4) !important;
+    }
+}
 @media(max-width:920px) {
     .main-wrap {
         flex-direction: column;
@@ -176,10 +193,27 @@ h1{
     #preview span{
         font-size:5.5em !important;
     }
+    .color_gradient-card {
+        width:calc((100% - 2 * 25px) / 3) !important;
+    }
+}
+@media(max-width:620px) {
+    .color_gradient-card {
+        width:calc((100% - 1 * 25px) / 2) !important;
+    }
 }
 @media(max-width:500px) {
     #preview span{
         font-size:2.5em !important;
+    }
+    .color_gradient-card{
+        width: 100% !important;
+    }
+    .color_category-filter-box {
+        gap: 10px !important;
+    }
+    .color_category-filter-box button {
+        padding: 5px 10px !important;
     }
 }
 button{
@@ -675,4 +709,106 @@ input[type=color] {
 }
 .message_success .message_content{
     background: var(--message-success-bg-color);
+}
+.colorhtml{
+    padding: 10px 25px;
+    width: auto;
+    text-align: center;
+    color:var(--code-text-color);
+    margin-top: 25px;
+    border-radius: 25px;
+    font-size: 14px;
+    background: var(--code-bg-color);
+}
+.colorhtml:hover{
+    background: var(--newbut-bg-color);
+    color: var(--newbut-color);
+}
+/* ========== 预设仓库 ========== */
+.preview-box-wrap {
+    background: var(--box-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--box-shadow);
+    width: auto;
+    flex: 1;
+}
+.color_category-filter-box{
+    background: var(--box-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--box-shadow);
+    width: auto;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+}
+.color_category-filter-box button{
+    padding: 10px 15px;
+    background: var(--layer-item-bg-color);
+    border: 0;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--layer-item-text-color);
+}
+.color_category-filter-box button:hover{
+    background: var(--button-hover-bg-color);
+    color: var(--button-text-hover-color);
+    cursor: pointer;
+}
+.color_preview-grid{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+}
+.color_gradient-card{
+    flex: 0 0 auto;
+    width: calc((100% - 4 * 25px) / 5);
+    overflow: hidden;
+    border-radius: 15px;
+    background: var(--box-bg);
+    background: var(--code-bg-color);
+}
+.color_gradient-card:hover{
+    box-shadow: var(--box-shadow);
+}
+.color_gradient-preview{
+    height: 120px;
+}
+.color_gradient-info{
+    padding: 15px;
+    font-size: 14px;
+    color: var(--text-color);
+
+}
+.color_gradient-name{
+    font-size: 16px;
+}
+.color_gradient-type{
+
+}
+.color_btn-group{
+    display: flex;
+    padding-top: 15px;
+    gap: 15px;
+    justify-content: flex-end;
+}
+.color_copy-btn,.color_edit-btn{
+    padding: 5px 10px;
+    border: 0;
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.color_copy-btn{
+    background: transparent;
+    color: var(--button-hover-bg-color);
+    border: 1px solid var(--button-hover-bg-color);
+    flex: 1;
+}
+.color_edit-btn{
+    background: var(--button-hover-bg-color);
+    color: var(--button-text-hover-color);
 }
