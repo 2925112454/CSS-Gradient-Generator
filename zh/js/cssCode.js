@@ -1111,7 +1111,7 @@ let previewFullScreen = false;
 let previewLastTapTime = 0;
 const PREVIEW_DOUBLE_TAP_MS = 350;
 let previewOriginParent = null;
-let previewOriginStyle = '';
+
 // PC右键
 preview.addEventListener('contextmenu', async function(e) {
     // 文字渐变模式下，该功能无效
@@ -1124,12 +1124,13 @@ preview.addEventListener('contextmenu', async function(e) {
     if (previewIsDetachFixed) {
         // 保存原始状态
         previewOriginParent = preview.parentElement;
-        previewOriginStyle = preview.getAttribute('style') || '';
         preview.style.position = 'fixed';
         preview.style.inset = '';
         preview.style.borderRadius  = '0';
     } else {
-        preview.setAttribute('style', previewOriginStyle);
+        preview.style.removeProperty('position');
+        preview.style.removeProperty('inset');
+        preview.style.removeProperty('borderRadius');        
     }
 });
 
@@ -1150,7 +1151,6 @@ preview.addEventListener('touchstart', function(e) {
             // 第一次全屏：缓存原始父级与样式
             if (!previewOriginParent) {
                 previewOriginParent = preview.parentElement;
-                previewOriginStyle = preview.getAttribute('style') || '';
             }
             // 挂载到body，撑满整个屏幕
             document.body.appendChild(preview);
@@ -1164,7 +1164,13 @@ preview.addEventListener('touchstart', function(e) {
         } else {
             // 退出全屏，归还到原来父容器，清空样式
             previewOriginParent.appendChild(preview);
-            preview.setAttribute('style', previewOriginStyle);
+            preview.style.removeProperty('position');
+            preview.style.removeProperty('top');
+            preview.style.removeProperty('left');
+            preview.style.removeProperty('width');
+            preview.style.removeProperty('height');
+            preview.style.removeProperty('zIndex');
+            preview.style.removeProperty('borderRadius');
         }
         previewLastTapTime = 0;
     } else {
