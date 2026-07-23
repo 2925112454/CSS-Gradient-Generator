@@ -1105,6 +1105,73 @@ async function handleCopy() {
 }
 copyBtn.onclick = handleCopy;
 preview.onclick = handleCopy;
+
+let previewIsDetachFixed = false;
+let previewFullScreen = false;
+let previewLastTapTime = 0;
+const PREVIEW_DOUBLE_TAP_MS = 350;
+let previewOriginParent = null;
+let previewOriginStyle = '';
+// PC右键
+preview.addEventListener('contextmenu', async function(e) {
+    // 文字渐变模式下，该功能无效
+    if (globalBgRepeat.value === 'text') {
+        return;
+    }
+    e.preventDefault();
+    previewIsDetachFixed = !previewIsDetachFixed;
+
+    if (previewIsDetachFixed) {
+        // 保存原始状态
+        previewOriginParent = preview.parentElement;
+        previewOriginStyle = preview.getAttribute('style') || '';
+        preview.style.position = 'fixed';
+        preview.style.inset = '';
+        preview.style.borderRadius  = '0';
+    } else {
+        preview.setAttribute('style', previewOriginStyle);
+    }
+});
+
+// 移动端
+preview.addEventListener('touchstart', function(e) {
+    const now = Date.now();
+    const diff = now - previewLastTapTime;
+    if (diff < PREVIEW_DOUBLE_TAP_MS) {
+        // 文字渐变模式下，双击全屏功能无效
+        if (globalBgRepeat.value === 'text') {
+            previewLastTapTime = 0;
+            return;
+        }
+        e.preventDefault();
+        previewFullScreen = !previewFullScreen;
+
+        if (previewFullScreen) {
+            // 第一次全屏：缓存原始父级与样式
+            if (!previewOriginParent) {
+                previewOriginParent = preview.parentElement;
+                previewOriginStyle = preview.getAttribute('style') || '';
+            }
+            // 挂载到body，撑满整个屏幕
+            document.body.appendChild(preview);
+            preview.style.position = 'fixed';
+            preview.style.top = '0';
+            preview.style.left = '0';
+            preview.style.width = '100vw';
+            preview.style.height = '100vh';
+            preview.style.zIndex = '99999';
+            preview.style.borderRadius  = '0';
+        } else {
+            // 退出全屏，归还到原来父容器，清空样式
+            previewOriginParent.appendChild(preview);
+            preview.setAttribute('style', previewOriginStyle);
+        }
+        previewLastTapTime = 0;
+    } else {
+        previewLastTapTime = now;
+    }
+}, { passive: false });
+
 // 角度双向同步
 angleRange.oninput = function(){
     angleNum.value = this.value;
