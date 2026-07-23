@@ -34,14 +34,14 @@ const LONG_PRESS_MS = 300;    // Time threshold for long-press to trigger drag
 const TAP_MOVE_THRESHOLD = 20; // Maximum allowed movement pixels for a tap
 const DOUBLE_TAP_MS = 350;     // Double-tap time threshold
 let ignoreNextClick = false;
-// Independent double-tap state for each module to avoid interference
+// Independent double-tap states for each module to avoid interference
 let lastLayerTapTime = 0;
 let lastLayerTapIndex = -1;
 let lastStopItemTapTime = 0;
 let lastStopItemTapIndex = -1;
 let lastStopTapTime = 0;
 let lastStopTapIndex = -1;
-// DOM
+// DOM Elements
 const preview = document.getElementById('preview');
 const cssCode = document.getElementById('cssCode');
 const layerList = document.getElementById('layerList');
@@ -78,7 +78,7 @@ const conicYNum = document.getElementById('conicYNum');
 const previewspan = document.getElementById('previewspan');
 const globalBgRepeat = document.getElementById('globalBgRepeat');
 
-// Only update slider positions and selection state
+// Only update thumb positions and selection state
 function updateStopThumbsPosition() {
   const stops = layers[activeLayerIndex].stops;
   const thumbs = stopTrack.querySelectorAll('.stop-drag-thumb');
@@ -99,14 +99,14 @@ function splitByCommaIgnoreBrackets(str) {
         const char = str[i];
         if (char === '(') stack++;
         if (char === ')') stack--;
-        // Only split at commas outside parentheses
+        // Split only at commas outside parentheses
         if (stack === 0 && char === ',') {
             const segment = str.slice(segmentStart, i).trim();
             if (segment) result.push(segment);
             segmentStart = i + 1;
         }
     }
-    // Handle the last segment
+    // Process the last segment
     const lastSegment = str.slice(segmentStart).trim();
     if (lastSegment) result.push(lastSegment);
     return result;
@@ -356,7 +356,7 @@ function parseSingleGrad(gStr) {
         let hasConfig = false;
         const configParts = firstItem.split(/\s+/).filter(Boolean);
         let ptr = 0;
-        // Parse from starting angle
+        // Parse from start angle
         if (ptr < configParts.length && configParts[ptr] === 'from') {
             ptr++;
             hasConfig = true;
@@ -437,7 +437,7 @@ function renderLayerList(){
         item.draggable = true;
         item.innerHTML = `
                 <div class="layer-head">
-                    <span class="layer-name">Layer ${idx+1} - ${
+                    <span class="layer-name">Layer ${idx+1} ${
                         ly.type === 'linear' ? 'Linear' : 
                         ly.type === 'repeating-linear' ? 'Repeating Linear' : 
                         ly.type === 'radial' ? 'Radial' : 
@@ -447,7 +447,7 @@ function renderLayerList(){
                     }</span>
                     <button class="del-layer" data-idx="${idx}"><i class="ri-close-large-line"></i></button>
                 </div>
-                <p style="font-size:12px;">${ly.stops.length} color stops | Right-click to copy/paste</p>
+                <p style="font-size:12px;">${ly.stops.length} stops | Right-click to copy/paste</p>
             `;
         item.onclick = function(e){
             if(e.target.classList.contains('del-layer')) return;
@@ -501,7 +501,7 @@ function renderLayerList(){
             // Long-press timer: enter drag mode after timeout
             longPressTimer = setTimeout(() => {
                 isLayerTouchDragging = true;
-                item.classList.add('dragging-source');// Drag source element detach effect
+                item.classList.add('dragging-source');// Visual effect for drag source element
                 if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
             }, LONG_PRESS_MS);
         }, { passive: true });
@@ -655,7 +655,7 @@ layerCtx.querySelectorAll('div[data-action]').forEach(el=>{
     }
 })
 
-// Sync layer to control panel
+// Sync layer data to control panel
 function syncLayerToControl(){
     const ly = layers[activeLayerIndex];
     gradType.value = ly.type;
@@ -683,7 +683,7 @@ function toggleGradPanel(){
     conicConfig.style.display = (t === 'conic' || t === 'repeating-conic') ? 'block' : 'none';
 }
 
-// Unified getter for mouse/touch horizontal coordinate
+// Unified function to get mouse/touch horizontal coordinate
 function getEventClientX(e) {
   if (e.touches && e.touches.length > 0) {
     return e.touches[0].clientX;
@@ -716,7 +716,7 @@ function renderStopDragTrack() {
       renderStopList();
       updatePreview();
     }
-    // Unified cleanup on drag end
+    // Unified drag end cleanup
     function handleEnd() {
       dragging = false;
       if (unbindMove) unbindMove();
@@ -759,7 +759,7 @@ function renderStopDragTrack() {
     thumb.addEventListener('touchstart', function(e) {
         const now = Date.now();
         const timeDiff = now - lastStopTapTime;
-        // Double-tap same slider → trigger even distribution
+        // Double-tap same thumb → trigger even distribution
         if (timeDiff < DOUBLE_TAP_MS && lastStopTapIndex === idx) {
             e.preventDefault();
             distributeStopsEvenly();
@@ -919,7 +919,7 @@ function renderStopList(){
     })
 }
 
-// Evenly distribute all color stop positions in the current layer
+// Evenly distribute all color stop positions on the current layer
 function distributeStopsEvenly() {
     const stops = layers[activeLayerIndex].stops;
     const total = stops.length;
@@ -933,7 +933,7 @@ function distributeStopsEvenly() {
     renderStopDragTrack();
     renderStopList();
     updatePreview();
-    showMessage('Sliders evenly distributed!', 'success');
+    showMessage('Color stops evenly distributed!', 'success');
 }
 
 // Color stop context menu
@@ -963,7 +963,7 @@ stopCtx.querySelectorAll('div[data-action]').forEach(el=>{
     }
 })
 
-// Generate single-layer gradient CSS
+// Generate CSS for a single gradient layer
 function buildSingleGradient(layer){
     const stopText = layer.stops.map(s=>`${hexToRgba(s.hex,s.alpha)} ${s.pos}%`).join(', ');
     if(layer.type === 'linear'){
@@ -981,7 +981,7 @@ function buildSingleGradient(layer){
     }
 }
 
-// Assemble full background style
+// Assemble full background CSS
 function generateFullBackground(){
     const reversedLayers = [...layers].reverse();
     const allGrads = reversedLayers.map(l=>buildSingleGradient(l)).join(', ');
@@ -1068,7 +1068,7 @@ async function copyText(text) {
             await navigator.clipboard.writeText(text);
             return true;
         } catch (err) {
-            // Modern API failed, fall back
+            // Fallback if modern API fails
            //console.log('Clipboard API failed, falling back to legacy copy', err);
         }
     }
@@ -1095,7 +1095,7 @@ async function handleCopy() {
 copyBtn.onclick = handleCopy;
 preview.onclick = handleCopy;
 
-// Two-way angle sync
+// Two-way angle synchronization
 angleRange.oninput = function(){
     angleNum.value = this.value;
     layers[activeLayerIndex].angle = Number(this.value);
@@ -1109,7 +1109,7 @@ angleNum.oninput = function(){
     updatePreview();
 }
 
-// Radial center X/Y sync
+// Radial center X/Y synchronization
 radXRange.oninput = function(){
     radXNum.value = this.value;
     layers[activeLayerIndex].radX = Number(this.value);
@@ -1165,7 +1165,7 @@ globalBgPosInput.oninput = function(){
     updatePreview();
 }
 
-// Two-way conic start angle sync
+// Two-way conic start angle synchronization
 conicAngleRange.oninput = function(){
     conicAngleNum.value = this.value;
     layers[activeLayerIndex].conicFromAngle = Number(this.value);
@@ -1179,7 +1179,7 @@ conicAngleNum.oninput = function(){
     updatePreview();
 }
 
-// Two-way conic center X sync
+// Two-way conic center X synchronization
 conicXRange.oninput = function(){
     conicXNum.value = this.value;
     layers[activeLayerIndex].conicX = Number(this.value);
@@ -1193,7 +1193,7 @@ conicXNum.oninput = function(){
     updatePreview();
 }
 
-// Two-way conic center Y sync
+// Two-way conic center Y synchronization
 conicYRange.oninput = function(){
     conicYNum.value = this.value;
     layers[activeLayerIndex].conicY = Number(this.value);
@@ -1218,44 +1218,51 @@ updatePreview();
 
 // ========== Cross-tab editing compatibility logic ==========
 window.loadPreset = loadPreset;// Expose global method for direct calls from color.html
+let editLoaded = false;
 // Load preset from localStorage
 function checkAndLoadPreset() {
     const preset = localStorage.getItem('gradient_edit_preset');
     if (preset) {
         loadPreset(preset);
+        editLoaded = true;
+        // Clear storage after loading to avoid data loss during tab switching
+        setTimeout(() => {
+            localStorage.removeItem('gradient_edit_preset');
+            localStorage.removeItem('gradient_edit_version');
+        }, 500);
     }
 }
-// Listen for postMessage, color.html sends data directly
+// Listen for postMessage, data sent directly from color.html
 window.addEventListener('message', function(e) {
-    // Validate origin for security
+    // Validate origin to ensure security
     if (e.origin !== location.origin) return;
     if (e.data && e.data.type === 'load-gradient' && e.data.data) {
         loadPreset(e.data.data);
     }
 });
-// Load on first page open
-checkAndLoadPreset();
+// Load on initial page open
+document.addEventListener('DOMContentLoaded', checkAndLoadPreset);
+// Sync storage updates across tabs
 window.addEventListener('storage', function(e) {
-    if (e.key === 'gradient_edit_version' && e.newValue) {
+    if (e.key === 'gradient_edit_version' && e.newValue && !editLoaded) {
         const preset = localStorage.getItem('gradient_edit_preset');
         if (preset) {
             loadPreset(preset);
+            setTimeout(() => {
+                localStorage.removeItem('gradient_edit_preset');
+                localStorage.removeItem('gradient_edit_version');
+            }, 500);
         }
     }
-});
-window.addEventListener('focus', checkAndLoadPreset);
-window.addEventListener('blur', function() {
-    localStorage.removeItem('gradient_edit_preset');
-    localStorage.removeItem('gradient_edit_version');
 });
 
 // Draggable preview area on mobile
 let isDrag = false;
 let offsetX = 0;
 let offsetY = 0;
-// Cache DOM elements
+// Cached DOM elements
 const previewWrapdom = document.querySelector('.preview-wrap');
-// Extract touchstart handler
+// Extract touchstart handler function
 function handleTouchStart(e) {
   isDrag = true;
   previewWrapdom.style.zIndex = 1;
@@ -1264,7 +1271,7 @@ function handleTouchStart(e) {
   offsetY = touch.clientY - previewWrapdom.offsetTop;
   e.preventDefault();
 }
-// Extract touchmove handler
+// Extract touchmove handler function
 function handleTouchMove(e) {
   if (!isDrag) return;
   const touch = e.touches[0];
@@ -1274,7 +1281,7 @@ function handleTouchMove(e) {
   previewWrapdom.style.top = y + 'px';
   e.preventDefault();
 }
-// Extract touchend handler
+// Extract touchend handler function
 function handleTouchEnd() {
   isDrag = false;
   previewWrapdom.style.zIndex = 1;
@@ -1303,7 +1310,6 @@ previewWrapdom.addEventListener('touchstart', function(){
   document.addEventListener('touchmove', tempMove, {passive:false});
   document.addEventListener('touchend', tempEnd);
 });
-
 // Check screen width and execute binding logic
 function checkScreenWidth() {
   if (window.innerWidth < 921) {
@@ -1312,7 +1318,7 @@ function checkScreenWidth() {
     unbindTouchDrag();
   }
 }
-// Run once on page initialization
+// Execute once on page initialization
 checkScreenWidth();
-// Re-check on window resize
+// Re-evaluate on window resize
 window.addEventListener('resize', checkScreenWidth);
