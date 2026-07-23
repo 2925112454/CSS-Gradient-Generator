@@ -1131,7 +1131,6 @@ let previewFullScreen = false;
 let previewLastTapTime = 0;
 const PREVIEW_DOUBLE_TAP_MS = 350;
 let previewOriginParent = null;
-let previewOriginStyle = '';
 
 // PC right-click: 
 preview.addEventListener('contextmenu', async function(e) {
@@ -1144,12 +1143,13 @@ preview.addEventListener('contextmenu', async function(e) {
     if (previewIsDetachFixed) {
         // Save original state
         previewOriginParent = preview.parentElement;
-        previewOriginStyle = preview.getAttribute('style') || '';
         preview.style.position = 'fixed';
         preview.style.inset = '';
         preview.style.borderRadius  = '0';
     } else {
-        preview.setAttribute('style', previewOriginStyle);
+        preview.style.removeProperty('position');
+        preview.style.removeProperty('inset');
+        preview.style.borderRadius  = '10px';
     }
 });
 
@@ -1169,7 +1169,6 @@ preview.addEventListener('touchstart', function(e) {
             // First fullscreen: cache original parent and styles
             if (!previewOriginParent) {
                 previewOriginParent = preview.parentElement;
-                previewOriginStyle = preview.getAttribute('style') || '';
             }
             // Append to body, fill entire screen
             document.body.appendChild(preview);
@@ -1183,7 +1182,13 @@ preview.addEventListener('touchstart', function(e) {
         } else {
             // Exit fullscreen, return to original parent, restore styles
             previewOriginParent.appendChild(preview);
-            preview.setAttribute('style', previewOriginStyle);
+            preview.style.removeProperty('position');
+            preview.style.removeProperty('top');
+            preview.style.removeProperty('left');
+            preview.style.removeProperty('width');
+            preview.style.removeProperty('height');
+            preview.style.removeProperty('zIndex');
+            preview.style.borderRadius  = '10px';
         }
         previewLastTapTime = 0;
     } else {
