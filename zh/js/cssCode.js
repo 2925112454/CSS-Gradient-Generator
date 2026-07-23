@@ -1130,7 +1130,7 @@ preview.addEventListener('contextmenu', async function(e) {
     } else {
         preview.style.removeProperty('position');
         preview.style.removeProperty('inset');
-        preview.style.removeProperty('borderRadius');        
+        preview.style.borderRadius  = '10px';       
     }
 });
 
@@ -1170,7 +1170,7 @@ preview.addEventListener('touchstart', function(e) {
             preview.style.removeProperty('width');
             preview.style.removeProperty('height');
             preview.style.removeProperty('zIndex');
-            preview.style.removeProperty('borderRadius');
+            preview.style.borderRadius  = '10px';
         }
         previewLastTapTime = 0;
     } else {
