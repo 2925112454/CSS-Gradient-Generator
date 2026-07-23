@@ -105,36 +105,40 @@ document.addEventListener('DOMContentLoaded', function () {
             editBtn.className = 'color_edit-btn';
             editBtn.dataset.index = index;
             // 绑定编辑逻辑
-            editBtn.addEventListener('click', () => {
-                // 打开或切换到编辑器窗口
+            editBtn.addEventListener('click', async () => {
+                const gradientCode = item.bgcolor;
+                // 1. 先存储数据，移除blur自动清除逻辑，改用页面加载完成后清理
+                localStorage.setItem('gradient_edit_preset', gradientCode);
+                localStorage.setItem('gradient_edit_version', Date.now().toString());
+
+                // 2. 打开新标签
                 const win = window.open('index.html', 'gradient-editor');
                 if (!win) {
-                    // 弹窗被拦截，降级走 localStorage
-                    localStorage.setItem('gradient_edit_preset', item.bgcolor);
-                    localStorage.setItem('gradient_edit_version', Date.now().toString());
+                    // 弹窗拦截提示用户手动刷新编辑器页面
+                    showMessage('浏览器拦截弹窗，请手动打开编辑器页面刷新', 'warn');
                     return;
                 }
-                
-                try {
-                    if (typeof win.loadPreset === 'function') {
-                        win.loadPreset(item.bgcolor);
-                        win.focus();
-                        return;
+                // 3. 轮询等待页面加载完成再传数据，解决服务器脚本加载延迟问题
+                let pollTimer = setInterval(() => {
+                    try {
+                        // 优先全局方法调用
+                        if (typeof win.loadPreset === 'function') {
+                            win.loadPreset(gradientCode);
+                            win.focus();
+                            clearInterval(pollTimer);
+                            return;
+                        }
+                        // 兜底postMessage
+                        win.postMessage({
+                            type: 'load-gradient',
+                            data: gradientCode
+                        }, location.origin);
+                    } catch (err) {
+                        // 页面未加载完成，等待下一轮
                     }
-                } catch (err) {
-                    // 跨域或访问受限，继续走下一个策略
-                }
-                try {
-                    win.postMessage({
-                        type: 'load-gradient',
-                        data: item.bgcolor
-                    }, location.origin);
-                } catch (err) {
-                    // 继续降级
-                }
-                localStorage.setItem('gradient_edit_preset', item.bgcolor);
-                localStorage.setItem('gradient_edit_version', Date.now().toString());
-                
+                }, 300);
+                // 超时销毁轮询，防止内存泄漏
+                setTimeout(() => clearInterval(pollTimer), 3000);
                 win.focus();
             });
             // 组装DOM
